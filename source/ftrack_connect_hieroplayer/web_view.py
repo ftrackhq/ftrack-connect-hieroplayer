@@ -7,7 +7,7 @@ from PySide import QtGui, QtCore, QtWebKit
 class WebView(QtGui.QWidget):
     '''Display a web view.'''
 
-    def __init__(self, name='', url='', plugin=None, parent=None):
+    def __init__(self, name, url='', plugin=None, parent=None):
         super(WebView, self).__init__(parent=parent)
 
         self.setObjectName(name.lower().replace(' ', '.'))
