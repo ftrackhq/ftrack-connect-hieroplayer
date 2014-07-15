@@ -105,12 +105,12 @@ class Plugin(QObject):
         self.loginPanel = _WebView('ftrack Login', url=url, plugin=self)
         hiero.ui.windowManager().addWindow(self.loginPanel)
 
-        self.timeline = _WebView('ftrack Timeline', plugin=self)
-        hiero.ui.windowManager().addWindow(self.timeline)
+        self.timelinePanel = _WebView('ftrack Timeline', plugin=self)
+        hiero.ui.windowManager().addWindow(self.timelinePanel)
 
-        self.actionpanel = _WebView('ftrack Action', plugin=self)
-        self.actionpanel.setMinimumWidth(500)
-        hiero.ui.windowManager().addWindow(self.actionpanel)
+        self.actionPanel = _WebView('ftrack Action', plugin=self)
+        self.actionPanel.setMinimumWidth(500)
+        hiero.ui.windowManager().addWindow(self.actionPanel)
 
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
@@ -158,10 +158,10 @@ class Plugin(QObject):
         if not self._loaded:
             return
 
-        self.timeline.frame.evaluateJavaScript(
+        self.timelinePanel.frame.evaluateJavaScript(
             'FT.Mediator.breakItem("{0}")'.format(versionId)
         )
-        self.actionpanel.frame.evaluateJavaScript(
+        self.actionPanel.frame.evaluateJavaScript(
             'FT.Mediator.breakItem("{0}")'.format(versionId)
         )
 
@@ -227,10 +227,10 @@ class Plugin(QObject):
         )
 
         # Load other views.
-        self.timeline.setUrl(
+        self.timelinePanel.setUrl(
             self.getViewUrl('freview_nav_v1')
         )
-        self.actionpanel.setUrl(
+        self.actionPanel.setUrl(
             self.getViewUrl('freview_action_v1')
         )
 
@@ -240,10 +240,10 @@ class Plugin(QObject):
         if not self._loaded:
             return
 
-        self.timeline.frame.evaluateJavaScript(
+        self.timelinePanel.frame.evaluateJavaScript(
             'FT.updateFtrack("{0}")'.format(eventData)
         )
-        self.actionpanel.frame.evaluateJavaScript(
+        self.actionPanel.frame.evaluateJavaScript(
             'FT.updateFtrack("{0}")'.format(eventData)
         )
 
