@@ -201,20 +201,6 @@ class Plugin(QObject):
         '''
         self.onLoad()
 
-        def updateActionPanel(event):
-            if not self.inCompareMode:
-                player = event.sender
-                sequence = player.sequence()
-                time = player.time()
-                ti = sequence.trackItemAt(time)
-                if ti:
-                    self.sendEvent('changedVersion', base64.b64encode(json.dumps({
-                        'type': 'changedVersion',
-                        'version': ti.name()
-                    })))
-
-        hiero.core.events.registerInterest('kPlaybackClipChanged', updateActionPanel)
-
     @Slot()
     def onLoad(self):
         '''Load panel contents if not already loaded.'''
@@ -235,6 +221,30 @@ class Plugin(QObject):
         )
         self.actionPanel.setUrl(
             self.getViewUrl('freview_action_v1')
+        )
+
+        # Ensure action panel updated when playback clip changed.
+        def updateActionPanel(event):
+            '''Update action panel on *event*.'''
+            if not self.inCompareMode:
+                player = event.sender
+                sequence = player.sequence()
+                time = player.time()
+
+                trackItem = sequence.trackItemAt(time)
+                if trackItem:
+                    self.sendEvent(
+                        'changedVersion',
+                        base64.b64encode(
+                            json.dumps({
+                                'type': 'changedVersion',
+                                'version': trackItem.name()
+                            })
+                        )
+                    )
+
+        hiero.core.events.registerInterest(
+            'kPlaybackClipChanged', updateActionPanel
         )
 
     @Slot(str, str)
