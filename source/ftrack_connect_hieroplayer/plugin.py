@@ -269,8 +269,8 @@ class Plugin(QObject):
             sequence = player.sequence()
 
             startPos = sequence.videoTrack(0).items()[index].handleInTime()
-
             view.setTime(startPos)
+
         except Exception:
             self.log.exception('Error loading index.')
 
