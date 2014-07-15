@@ -209,8 +209,8 @@ class Plugin(QObject):
                 ti = sequence.trackItemAt(time)
                 if ti:
                     self.sendEvent('changedVersion', base64.b64encode(json.dumps({
-                        "type": "changedVersion",
-                        "version": ti.name()
+                        'type': 'changedVersion',
+                        'version': ti.name()
                     })))
 
         hiero.core.events.registerInterest('kPlaybackClipChanged', updateActionPanel)
@@ -382,7 +382,7 @@ class Plugin(QObject):
 
         sequence = hiero.core.Sequence(str(uuid.uuid1()))
         clipsBin.addItem(hiero.core.BinItem(sequence))
-        track = hiero.core.VideoTrack("VideoTrack")
+        track = hiero.core.VideoTrack('VideoTrack')
         trackItem = None
 
         for version in versions:
