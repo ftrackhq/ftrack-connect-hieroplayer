@@ -34,7 +34,7 @@ class Plugin(QObject):
         self.project = None
         self.prevSequence = None
         self.inCompareMode = False
-        self.componentFilesystemPaths = {}
+        self._componentPathCache = {}
 
         appSettings = hiero.core.ApplicationSettings()
 
@@ -169,23 +169,23 @@ class Plugin(QObject):
         )
 
     def _getFilePath(self, componentId):
-        '''Return a single filesystem path for *componentId*.
+        '''Return a single filesystem path for *componentId*.'''
+        path = self._componentPathCache.get(componentId, None)
 
-        Generates a filesystem path for the specified *componentId*.
-
-        '''
-        api = self.api
-
-        if componentId not in self.componentFilesystemPaths:
-            location = api.pickLocation(componentId)
+        if path is None:
+            location = self.api.pickLocation(componentId)
 
             if not location:
-                raise IOError
+                raise IOError(
+                    'Could not retrieve file path for component {0} as no '
+                    'location for component accessible.'.format(componentId)
+                )
 
             component = location.getComponent(componentId)
-            self.componentFilesystemPaths[componentId] = component.getFilesystemPath()
+            path = component.getFilesystemPath()
+            self._componentPathCache[componentId] = path
 
-        return self.componentFilesystemPaths[componentId]
+        return path
 
     @Slot()
     def loadActionPanel(self):
