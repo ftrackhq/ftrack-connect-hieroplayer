@@ -138,13 +138,21 @@ class Plugin(QObject):
     @property
     def api(self):
         '''Return ftrack API.'''
-        try:
-            import ftrack as ftrack
-            ftrack.setup(actions=False)
-        except ImportError:
-            return False
-        self.logger.debug('ftrack API module loaded.')
-        return ftrack
+        if not self._api:
+            try:
+                import ftrack as ftrack
+                ftrack.setup(actions=False)
+            except ImportError:
+                self.logger.warning(
+                    'Could not load ftrack Python API. Please check it is '
+                    'available on the PYTHONPATH.'
+                )
+                return False
+            else:
+                self._api = ftrack
+                self.logger.debug('Loaded ftrack Python API successfully.')
+
+        return self._api
 
     def _brokenVersion(self, versionId):
         if not self._loaded:
