@@ -157,7 +157,8 @@ class Plugin(QObject):
 
         return self._api
 
-    def _brokenVersion(self, versionId):
+    def _markBrokenClip(self, versionId):
+        '''Mark clip representing version with *versionId* as unplayable.'''
         if not self._loaded:
             return
 
@@ -414,7 +415,7 @@ class Plugin(QObject):
                 self.logger.exception(
                     'Something is wrong, marking version as broken'
                 )
-                self._brokenVersion(version.get('versionId'))
+                self._markBrokenClip(version.get('versionId'))
 
         sequence.addTrack(track)
 
@@ -431,4 +432,4 @@ class Plugin(QObject):
         try:
             self._getFilePath(componentId)
         except IOError:
-            self._brokenVersion(versionId)
+            self._markBrokenClip(versionId)
