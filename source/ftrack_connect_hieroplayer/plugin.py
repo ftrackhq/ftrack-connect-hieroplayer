@@ -90,10 +90,12 @@ class Plugin(QObject):
         if not self.api:
             url = self.getViewUrl('api_error')
 
+        # Create cookie jar to store authentication credentials in for session.
         cookieJar = QNetworkCookieJar()
         self.networkAccessManager = QNetworkAccessManager()
         self.networkAccessManager.setCookieJar(cookieJar)
 
+        # Construct ftrack panels.
         self.loginPanel = _WebView('ftrack Login', url=url, plugin=self)
         hiero.ui.windowManager().addWindow(self.loginPanel)
 
