@@ -282,6 +282,14 @@ class Plugin(QObject):
 
     @Slot(str, str, str)
     def compareMode(self, componentIdA, componentIdB, mode='tile'):
+        '''Replace current sequence with comparison of two components.
+
+        *componentIdA* and *componentIdB* should be the ids of the components
+        to compare.
+
+        *mode* determines the comparison view (e.g. tile, wipe).
+
+        '''
         if mode == 'load' and componentIdA is None:
             return
         elif mode != 'load' and (not componentIdA or not componentIdB):
@@ -333,6 +341,7 @@ class Plugin(QObject):
 
     @Slot(int)
     def compareOff(self, idx=-1):
+        '''Cancel compare view and return to previous loaded sequence.'''
         self.inCompareMode = False
         view = hiero.ui.currentViewer()
 
@@ -354,6 +363,7 @@ class Plugin(QObject):
 
     @Slot(str)
     def loadSequence(self, versions):
+        '''Load list of *versions* into new unique sequence on timeline.'''
         try:
             versions = json.loads(versions)
         except:
@@ -433,7 +443,11 @@ class Plugin(QObject):
 
     @Slot(str, str)
     def validateComponentLocation(self, componentId, versionId):
-        '''Return if the *componentId* is accessible in a local location.'''
+        '''Validate if the *componentId* is accessible in a local location.
+
+        Mark clip as broken if not accessible.
+
+        '''
         try:
             self._getFilePath(componentId)
         except IOError:
