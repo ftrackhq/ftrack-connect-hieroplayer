@@ -30,19 +30,11 @@ class Plugin(QObject):
 
         self._loaded = False
         self._api = None
+
         self.project = None
         self.prevSequence = None
         self.inCompareMode = False
         self.componentFilesystemPaths = {}
-
-        configuration = {
-            'attachments': False,
-            'versionsTab': True,
-            'notesTab': True,
-            'undockable': False
-        }
-
-        self.cfg = base64.b64encode(json.dumps(configuration))
 
         appSettings = hiero.core.ApplicationSettings()
 
@@ -121,10 +113,19 @@ class Plugin(QObject):
 
         if not os.path.exists(url):
             # Assume a url served by ftrack server.
+            configuration = base64.b64encode(
+                json.dumps({
+                    'attachments': False,
+                    'versionsTab': True,
+                    'notesTab': True,
+                    'undockable': False
+                })
+            )
+
             urlTemplate = (
                 '{0}/widget?theme=tf&view={{0}}&itemId=freview'
                 '&controller=widget&widgetCfg={1}'
-                .format(self.serverUrl, self.cfg)
+                .format(self.serverUrl, configuration)
             )
             url = urlTemplate.format(name)
 
