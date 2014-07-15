@@ -272,7 +272,7 @@ class Plugin(QObject):
             view.setTime(startPos)
 
         except Exception:
-            self.log.exception('Error loading index.')
+            self.logger.exception('Error loading index.')
 
     @Slot(str, str, str)
     def compareMode(self, componentIdA, componentIdB, mode='tile'):
@@ -344,7 +344,7 @@ class Plugin(QObject):
                 startPos = sequence.videoTrack(0).items()[idx].timelineIn()
                 view.setTime(startPos)
             except Exception:
-                self.log.exception('Unable to go to index.')
+                self.logger.exception('Unable to go to index.')
 
     @Slot(str)
     def loadSequence(self, versions):
@@ -402,20 +402,19 @@ class Plugin(QObject):
                 version['source'] = self._getFilePath(
                     version.get('componentId')
                 )
-            except Exception:
-                self.log.exception(
-                    'Something is wrong, marking version as broken'
-                )
-                self._brokenVersion(version.get('versionId'))
-            else:
-                pass
-
                 source = hiero.core.MediaSource(version.get('source'))
                 clip = hiero.core.Clip(source)
+
                 trackItem = createTrackItem(
                     track, version.get('versionId'),
                     clip, lastTrackItem=trackItem
                 )
+
+            except Exception:
+                self.logger.exception(
+                    'Something is wrong, marking version as broken'
+                )
+                self._brokenVersion(version.get('versionId'))
 
         sequence.addTrack(track)
 
