@@ -7,6 +7,7 @@ import json
 import os
 import base64
 import logging
+import uuid
 
 from PySide.QtNetwork import *
 from PySide.QtCore import QObject, Slot
