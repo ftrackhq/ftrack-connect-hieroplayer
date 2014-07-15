@@ -8,6 +8,21 @@ class WebView(QtGui.QWidget):
     '''Display a web view.'''
 
     def __init__(self, name, url='', plugin=None, parent=None):
+        '''Initialise web view with *name* and *url*.
+
+        *name* will be used as the title of the widget and also will be
+        converted to a lowercase dotted name which the panel can be referenced
+        with. For example, "My Panel" -> "my.panel".
+
+        *url* should be the initial url to display.
+
+        *plugin* should be an instance of
+        *:py:class:`ftrack_connect_hieroplayer.plugin.Plugin` which will be
+        *injected into the JavaScript window object of any loaded page.
+
+        *parent* is the optional parent of this widget.
+
+        '''
         super(WebView, self).__init__(parent=parent)
 
         self.setObjectName(name.lower().replace(' ', '.'))
