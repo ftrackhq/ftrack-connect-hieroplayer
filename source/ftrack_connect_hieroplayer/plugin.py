@@ -98,8 +98,8 @@ class Plugin(QObject):
             url = self.getViewUrl('api_error')
 
         cookieJar = QNetworkCookieJar()
-        self.nam = QNetworkAccessManager()
-        self.nam.setCookieJar(cookieJar)
+        self.networkAccessManager = QNetworkAccessManager()
+        self.networkAccessManager.setCookieJar(cookieJar)
 
         self.loginPanel = _WebView('ftrack Login', url=url, plugin=self)
         hiero.ui.windowManager().addWindow(self.loginPanel)
