@@ -7,7 +7,7 @@ from PySide import QtGui, QtCore, QtWebKit
 class WebView(QtGui.QWidget):
     '''Display a web view.'''
 
-    def __init__(self, name='', url='', nam=None, plugin=None, parent=None):
+    def __init__(self, name='', url='', plugin=None, parent=None):
         super(WebView, self).__init__(parent=parent)
 
         self.setObjectName(name.lower().replace(' ', '.'))
@@ -17,7 +17,12 @@ class WebView(QtGui.QWidget):
 
         self.webView = QtWebKit.QWebView()
         self.webView.urlChanged.connect(self.changedLocation)
-        self.webView.page().setNetworkAccessManager(nam)
+
+        # Use plugin network access manager if available.
+        if self.plugin:
+            self.webView.page().setNetworkAccessManager(
+                self.plugin.networkAccessManager
+            )
 
         self.frame = self.webView.page().mainFrame()
 

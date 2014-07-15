@@ -101,19 +101,13 @@ class Plugin(QObject):
         self.nam = QNetworkAccessManager()
         self.nam.setCookieJar(cookieJar)
 
-        self.loginPanel = _WebView(
-            name='ftrack Login', url=url, nam=self.nam, plugin=self
-        )
+        self.loginPanel = _WebView(name='ftrack Login', url=url, plugin=self)
         hiero.ui.windowManager().addWindow(self.loginPanel)
 
-        self.timeline = _WebView(
-            name='ftrack Timeline', nam=self.nam, plugin=self
-        )
+        self.timeline = _WebView(name='ftrack Timeline', plugin=self)
         hiero.ui.windowManager().addWindow(self.timeline)
 
-        self.actionpanel = _WebView(
-            name='ftrack Action', nam=self.nam, plugin=self
-        )
+        self.actionpanel = _WebView(name='ftrack Action', plugin=self)
         self.actionpanel.setMinimumWidth(500)
         hiero.ui.windowManager().addWindow(self.actionpanel)
 
