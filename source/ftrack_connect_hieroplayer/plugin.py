@@ -196,7 +196,7 @@ class Plugin(QObject):
         .. note::
 
             This method should ideally be called something less specific such as
-            onAuthenticated.
+            onLoad.
 
         '''
         self.onLoad()
