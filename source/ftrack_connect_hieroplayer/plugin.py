@@ -22,10 +22,11 @@ class Plugin(QObject):
 
     def __init__(self):
         '''Initialise plugin.'''
+        super(Plugin, self).__init__()
+
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        super(Plugin, self).__init__()
 
         self._loaded = False
         self._api = None
