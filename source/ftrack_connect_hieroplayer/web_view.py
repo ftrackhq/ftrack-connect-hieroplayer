@@ -7,13 +7,13 @@ from PySide import QtGui, QtCore, QtWebKit
 class WebView(QtGui.QWidget):
     '''Display a web view.'''
 
-    def __init__(self, name='', url='', nam=None, session=None, parent=None):
+    def __init__(self, name='', url='', nam=None, plugin=None, parent=None):
         super(WebView, self).__init__(parent=parent)
 
         self.setObjectName(name.lower().replace(' ', '.'))
         self.setWindowTitle(name)
 
-        self.session = session
+        self.plugin = plugin
 
         self.webView = QtWebKit.QWebView()
         self.webView.urlChanged.connect(self.changedLocation)
@@ -45,8 +45,8 @@ class WebView(QtGui.QWidget):
         self.inspector.setShown(self.inspector.isHidden())
 
     def changedLocation(self):
-        # Inject into page the session instance as bridge.
-        self.frame.addToJavaScriptWindowObject('hierosession', self.session)
+        # Inject into page the plugin instance as bridge.
+        self.frame.addToJavaScriptWindowObject('hierosession', self.plugin)
 
     def setUrl(self, url):
         '''Load *url*.'''

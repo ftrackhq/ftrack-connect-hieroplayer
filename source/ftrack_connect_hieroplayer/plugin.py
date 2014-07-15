@@ -9,14 +9,14 @@ import base64
 import logging
 
 from PySide.QtNetwork import *
+from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
-from .session import Session as _Session
 from .web_view import WebView as _WebView
 
 
-class Plugin(object):
+class Plugin(QObject):
     '''ftrack connect HIEROPLAYER plugin.'''
 
     def __init__(self):
@@ -24,6 +24,14 @@ class Plugin(object):
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
+        super(Plugin, self).__init__()
+
+        self._loaded = False
+        self._api = None
+        self.project = None
+        self.prevSequence = None
+        self.inCompareMode = False
+        self.componentFilesystemPaths = {}
 
         configuration = {
             'attachments': False,
@@ -90,8 +98,7 @@ class Plugin(object):
                     url, entityId, entityType
                 )
 
-        self.session = _Session(self)
-        if not self.session.api:
+        if not self.api:
             url = self.getViewUrl('api_error')
 
         cookieJar = QNetworkCookieJar()
@@ -99,14 +106,14 @@ class Plugin(object):
         self.nam.setCookieJar(cookieJar)
 
         self.loginPanel = _WebView(
-            name='ftrack Login', nam=self.nam, session=self.session
+            name='ftrack Login', nam=self.nam, plugin=self
         )
         self.loginPanel.setUrl(url)
         hiero.ui.windowManager().addWindow(self.loginPanel)
 
         self.timeline = _WebView(
             name='ftrack Timeline', url='',
-            nam=self.nam, session=self.session
+            nam=self.nam, plugin=self
         )
         hiero.ui.windowManager().addWindow(self.timeline)
 
@@ -114,7 +121,7 @@ class Plugin(object):
             name='ftrack Action',
             url='',
             nam=self.nam,
-            session=self.session
+            plugin=self
         )
         self.actionpanel.setMinimumWidth(500)
         hiero.ui.windowManager().addWindow(self.actionpanel)
@@ -137,3 +144,281 @@ class Plugin(object):
 
         return url
 
+
+    @property
+    def api(self):
+        '''Return ftrack API.'''
+        try:
+            import ftrack as ftrack
+            ftrack.setup(actions=False)
+        except ImportError:
+            return False
+        self.logger.debug('ftrack API module loaded.')
+        return ftrack
+
+    def _brokenVersion(self, versionId):
+        if not self._loaded:
+            return
+
+        self.timeline.frame.evaluateJavaScript(
+            'FT.Mediator.breakItem("{0}")'.format(versionId)
+        )
+        self.actionpanel.frame.evaluateJavaScript(
+            'FT.Mediator.breakItem("{0}")'.format(versionId)
+        )
+
+    def _getFilePath(self, componentId):
+        '''Return a single filesystem path for *componentId*.
+
+        Generates a filesystem path for the specified *componentId*.
+
+        '''
+        api = self.api
+
+        if componentId not in self.componentFilesystemPaths:
+            location = api.pickLocation(componentId)
+
+            if not location:
+                raise IOError
+
+            component = location.getComponent(componentId)
+            self.componentFilesystemPaths[componentId] = component.getFilesystemPath()
+
+        return self.componentFilesystemPaths[componentId]
+
+    @Slot()
+    def loadActionPanel(self):
+        '''Load action panel.
+
+        Called from Javascript once login has completed.
+
+        .. note::
+
+            This method should ideally be called something less specific such as
+            onAuthenticated.
+
+        '''
+        self.onLoad()
+
+        def updateActionPanel(event):
+            if not self.inCompareMode:
+                player = event.sender
+                sequence = player.sequence()
+                time = player.time()
+                ti = sequence.trackItemAt(time)
+                if ti:
+                    self.sendEvent('changedVersion', base64.b64encode(json.dumps({
+                        "type": "changedVersion",
+                        "version": ti.name()
+                    })))
+
+        hiero.core.events.registerInterest('kPlaybackClipChanged', updateActionPanel)
+
+    @Slot()
+    def onLoad(self):
+        '''Load panel contents if not already loaded.'''
+        if self._loaded:
+            return
+
+        self._loaded = True
+
+        # Display authenticated page.
+        # TODO: Find a way to change focus to Viewer tab / close this tab.
+        self.loginPanel.setUrl(
+            self.getViewUrl('authenticated')
+        )
+
+        # Load other views.
+        self.timeline.setUrl(
+            self.getViewUrl('freview_nav_v1')
+        )
+        self.actionpanel.setUrl(
+            self.getViewUrl('freview_action_v1')
+        )
+
+    @Slot(str, str)
+    def sendEvent(self, eventName, eventData):
+        '''Send event with *eventName* and *eventData*.'''
+        if not self._loaded:
+            return
+
+        self.timeline.frame.evaluateJavaScript(
+            'FT.updateFtrack("{0}")'.format(eventData)
+        )
+        self.actionpanel.frame.evaluateJavaScript(
+            'FT.updateFtrack("{0}")'.format(eventData)
+        )
+
+    @Slot(int)
+    def jumpToIndex(self, index):
+        '''Set viewer position to item at *index*.'''
+        try:
+            view = hiero.ui.currentViewer()
+            player = view.player()
+            sequence = player.sequence()
+
+            startPos = sequence.videoTrack(0).items()[index].handleInTime()
+
+            view.setTime(startPos)
+        except Exception:
+            self.log.exception('Error loading index.')
+
+    @Slot(str, str, str)
+    def compareMode(self, componentIdA, componentIdB, mode='tile'):
+        if mode == 'load' and componentIdA is None:
+            return
+        elif mode != 'load' and (not componentIdA or not componentIdB):
+            return
+
+        filesystemPathA = self._getFilePath(componentIdA)
+
+        try:
+            filesystemPathB = self._getFilePath(componentIdB)
+        except:
+            if mode != 'load':
+                raise
+
+        clipsBin = self.project.clipsBin()
+
+        sourceA = hiero.core.MediaSource(filesystemPathA)
+        clipA = hiero.core.Clip(sourceA)
+        clipsBin.addItem(hiero.core.BinItem(clipA))
+
+        if not mode == 'load':
+            sourceB = hiero.core.MediaSource(filesystemPathB)
+            clipB = hiero.core.Clip(sourceB)
+            clipsBin.addItem(hiero.core.BinItem(clipB))
+
+        view = hiero.ui.currentViewer()
+        view.wipeTool().setActive(False)
+
+        if mode in ['wipe', 'load']:
+            view.setLayoutMode(view.LayoutMode.eLayoutStack)
+            if mode == 'wipe':
+                view.wipeTool().setActive(True)
+        else:
+            view.setLayoutMode(view.LayoutMode.eLayoutHorizontal)
+
+        if self.prevSequence is None:
+            self.prevSequence = view.player(0).sequence()
+
+        self.inCompareMode = True
+
+        view.player(0).setSequence(clipA)
+
+        if not mode == 'load':
+            view.player(1).setSequence(clipB)
+
+        else:
+            view.player(1).setSequence(clipA)
+
+        view.setTime(0)
+
+    @Slot(int)
+    def compareOff(self, idx=-1):
+        self.inCompareMode = False
+        view = hiero.ui.currentViewer()
+
+        view.setLayoutMode(view.LayoutMode.eLayoutStack)
+        view.wipeTool().setActive(False)
+        sequence = self.prevSequence
+        self.prevSequence = None
+        view.player(0).setSequence(sequence)
+        # view.player(0).zoomToFit()
+        # view.player(1).zoomToFit()
+        view.player(1).setSequence(sequence)
+
+        if idx != -1:
+            try:
+                startPos = sequence.videoTrack(0).items()[idx].timelineIn()
+                view.setTime(startPos)
+            except Exception:
+                self.log.exception('Unable to go to index.')
+
+    @Slot(str)
+    def loadSequence(self, versions):
+        try:
+            versions = json.loads(versions)
+        except:
+            return
+
+        self.prevSequence = None
+
+        # helper method for creating track items from clips
+        def createTrackItem(track, trackItemName, sourceClip, lastTrackItem=None):
+            trackItem = track.createTrackItem(trackItemName)
+            trackItem.setName(trackItemName)
+            trackItem.setSource(sourceClip)
+
+            if lastTrackItem:
+                trackItem.setTimelineIn(
+                    lastTrackItem.timelineOut() + 1
+                )
+
+                trackItem.setTimelineOut(
+                    lastTrackItem.timelineOut() + sourceClip.duration()
+                )
+
+            else:
+                trackItem.setTimelineIn(0)
+                trackItem.setTimelineOut(
+                    trackItem.sourceDuration()-1
+                )
+
+            # add the item to the track
+            track.addItem(trackItem)
+
+            return trackItem
+
+        if not self.project:
+            project = hiero.core.projects()[-1]
+
+            if not project:
+                project = hiero.core.newProject()
+            self.project = project
+
+        clipsBin = self.project.clipsBin()
+
+        sequence = hiero.core.Sequence(str(uuid.uuid1()))
+        clipsBin.addItem(hiero.core.BinItem(sequence))
+        track = hiero.core.VideoTrack("VideoTrack")
+        trackItem = None
+
+        for version in versions:
+            try:
+                # Get filesystem path for a component from the most suitable
+                # location.
+                version['source'] = self._getFilePath(
+                    version.get('componentId')
+                )
+            except Exception:
+                self.log.exception(
+                    'Something is wrong, marking version as broken'
+                )
+                self._brokenVersion(version.get('versionId'))
+            else:
+                pass
+
+                source = hiero.core.MediaSource(version.get('source'))
+                clip = hiero.core.Clip(source)
+                trackItem = createTrackItem(
+                    track, version.get('versionId'),
+                    clip, lastTrackItem=trackItem
+                )
+
+        sequence.addTrack(track)
+
+        view = hiero.ui.currentViewer()
+        player = view.player(0)
+
+        player.setSequence(sequence)
+
+        view.stop()
+
+    @Slot(str, str)
+    def validateComponentLocation(self, componentId, versionId):
+        '''Return if the *componentId* is accessible in a local location.'''
+        try:
+            self._getFilePath(componentId)
+        except IOError:
+            self._brokenVersion(versionId)
