@@ -31,8 +31,8 @@ class Plugin(QObject):
         self._loaded = False
         self._api = None
 
-        self.project = None
-        self.prevSequence = None
+        self._project = None
+        self._previousSequence = None
         self.inCompareMode = False
         self._componentPathCache = {}
 
@@ -287,29 +287,29 @@ class Plugin(QObject):
         *componentIdA* and *componentIdB* should be the ids of the components
         to compare.
 
-        *mode* determines the comparison view (e.g. tile, wipe).
+        *mode* determines the comparison view (e.g. tile, wipe, load).
 
         '''
         if mode == 'load' and componentIdA is None:
             return
+
         elif mode != 'load' and (not componentIdA or not componentIdB):
             return
 
         filesystemPathA = self._getFilePath(componentIdA)
-
         try:
             filesystemPathB = self._getFilePath(componentIdB)
-        except:
+        except Exception:
             if mode != 'load':
                 raise
 
-        clipsBin = self.project.clipsBin()
+        clipsBin = self._project.clipsBin()
 
         sourceA = hiero.core.MediaSource(filesystemPathA)
         clipA = hiero.core.Clip(sourceA)
         clipsBin.addItem(hiero.core.BinItem(clipA))
 
-        if not mode == 'load':
+        if mode != 'load':
             sourceB = hiero.core.MediaSource(filesystemPathB)
             clipB = hiero.core.Clip(sourceB)
             clipsBin.addItem(hiero.core.BinItem(clipB))
@@ -317,23 +317,24 @@ class Plugin(QObject):
         view = hiero.ui.currentViewer()
         view.wipeTool().setActive(False)
 
-        if mode in ['wipe', 'load']:
+        if mode in ('wipe', 'load'):
             view.setLayoutMode(view.LayoutMode.eLayoutStack)
+
             if mode == 'wipe':
                 view.wipeTool().setActive(True)
+
         else:
             view.setLayoutMode(view.LayoutMode.eLayoutHorizontal)
 
-        if self.prevSequence is None:
-            self.prevSequence = view.player(0).sequence()
+        if self._previousSequence is None:
+            self._previousSequence = view.player(0).sequence()
 
         self.inCompareMode = True
 
         view.player(0).setSequence(clipA)
 
-        if not mode == 'load':
+        if mode != 'load':
             view.player(1).setSequence(clipB)
-
         else:
             view.player(1).setSequence(clipA)
 
@@ -347,32 +348,29 @@ class Plugin(QObject):
 
         view.setLayoutMode(view.LayoutMode.eLayoutStack)
         view.wipeTool().setActive(False)
-        sequence = self.prevSequence
-        self.prevSequence = None
+
+        sequence = self._previousSequence
+        self._previousSequence = None
         view.player(0).setSequence(sequence)
-        # view.player(0).zoomToFit()
-        # view.player(1).zoomToFit()
         view.player(1).setSequence(sequence)
 
         if idx != -1:
-            try:
-                startPos = sequence.videoTrack(0).items()[idx].timelineIn()
-                view.setTime(startPos)
-            except Exception:
-                self.logger.exception('Unable to go to index.')
+            self.jumpToIndex(idx)
 
     @Slot(str)
     def loadSequence(self, versions):
         '''Load list of *versions* into new unique sequence on timeline.'''
         try:
             versions = json.loads(versions)
-        except:
+        except Exception:
             return
 
-        self.prevSequence = None
+        self._previousSequence = None
 
-        # helper method for creating track items from clips
-        def createTrackItem(track, trackItemName, sourceClip, lastTrackItem=None):
+        def createTrackItem(
+                track, trackItemName, sourceClip, lastTrackItem=None
+        ):
+            '''Helper method to create track items from clips.'''
             trackItem = track.createTrackItem(trackItemName)
             trackItem.setName(trackItemName)
             trackItem.setSource(sourceClip)
@@ -392,22 +390,21 @@ class Plugin(QObject):
                     trackItem.sourceDuration()-1
                 )
 
-            # add the item to the track
             track.addItem(trackItem)
-
             return trackItem
 
-        if not self.project:
+        if not self._project:
             project = hiero.core.projects()[-1]
-
             if not project:
                 project = hiero.core.newProject()
-            self.project = project
 
-        clipsBin = self.project.clipsBin()
+            self._project = project
+
+        clipsBin = self._project.clipsBin()
 
         sequence = hiero.core.Sequence(str(uuid.uuid1()))
         clipsBin.addItem(hiero.core.BinItem(sequence))
+
         track = hiero.core.VideoTrack('VideoTrack')
         trackItem = None
 
@@ -436,7 +433,6 @@ class Plugin(QObject):
 
         view = hiero.ui.currentViewer()
         player = view.player(0)
-
         player.setSequence(sequence)
 
         view.stop()
