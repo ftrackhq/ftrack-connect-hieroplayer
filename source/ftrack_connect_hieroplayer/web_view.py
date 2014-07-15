@@ -50,7 +50,9 @@ class WebView(QtGui.QWidget):
         self.inspector.setShown(self.inspector.isHidden())
 
     def changedLocation(self):
-        # Inject into page the plugin instance as bridge.
+        '''Handle location changed event.'''
+        # Inject the current plugin into the page so that it can be called
+        # from JavaScript.
         self.frame.addToJavaScriptWindowObject('hierosession', self.plugin)
 
     def setUrl(self, url):
