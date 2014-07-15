@@ -3,6 +3,8 @@
 
 from __future__ import absolute_import
 
+from ._version import __version__
+
 # Setup logging for ftrack.
 # TODO: Check with The Foundry if there is any better way to customise logging.
 from . import logging
