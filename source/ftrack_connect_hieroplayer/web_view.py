@@ -1,6 +1,10 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2014 ftrack
 
+from __future__ import absolute_import
+
+import logging
+
 from PySide import QtGui, QtCore, QtWebKit
 
 
@@ -24,6 +28,10 @@ class WebView(QtGui.QWidget):
 
         '''
         super(WebView, self).__init__(parent=parent)
+
+        self.logger = logging.getLogger(
+            __name__ + '.' + self.__class__.__name__
+        )
 
         self.setObjectName(name.lower().replace(' ', '.'))
         self.setWindowTitle(name)
@@ -67,6 +75,7 @@ class WebView(QtGui.QWidget):
 
     def setUrl(self, url):
         '''Load *url*.'''
+        self.logger.debug('Changing url to {0}.'.format(url))
         self.webView.load(QtCore.QUrl(url))
 
     def url(self):
