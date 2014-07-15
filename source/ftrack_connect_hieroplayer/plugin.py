@@ -230,6 +230,11 @@ class Plugin(QObject):
             if not self.inCompareMode:
                 player = event.sender
                 sequence = player.sequence()
+
+                if sequence is None:
+                    # Can happen when closing HIEROPLAYER for example.
+                    return
+
                 time = player.time()
 
                 trackItem = sequence.trackItemAt(time)
