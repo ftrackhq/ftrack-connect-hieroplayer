@@ -47,8 +47,8 @@ class Plugin(QObject):
         serverUrl = os.environ.get('FTRACK_SERVER', None)
         appServerUrl = appSettings.value('FTRACK_SERVER', defaultValue=None)
 
-        entityId = None
-        entityType = None
+        self.entityId = None
+        self.entityType = None
 
         # Check for environment variable specifying additional information to
         # use when loading.
@@ -72,8 +72,8 @@ class Plugin(QObject):
                 if selection:
                     try:
                         entity = selection[0]
-                        entityId = entity.get('entityId')
-                        entityType = entity.get('entityType')
+                        self.entityId = entity.get('entityId')
+                        self.entityType = entity.get('entityType')
 
                     except (IndexError, AttributeError, KeyError):
                         self.logger.exception(
@@ -91,12 +91,7 @@ class Plugin(QObject):
 
         else:
             self.serverUrl = serverUrl or appServerUrl
-
             url = self.getViewUrl('freview_nav_v1')
-            if entityId and entityType:
-                url = '{0}&entityId={1}&entityType={2}'.format(
-                    url, entityId, entityType
-                )
 
         if not self.api:
             url = self.getViewUrl('api_error')
@@ -137,8 +132,12 @@ class Plugin(QObject):
             )
             url = urlTemplate.format(name)
 
-        return url
+            if self.entityId and self.entityType:
+                url = '{0}&entityId={1}&entityType={2}'.format(
+                    url, self.entityId, self.entityType
+                )
 
+        return url
 
     @property
     def api(self):
