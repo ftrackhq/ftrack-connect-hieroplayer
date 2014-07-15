@@ -26,6 +26,7 @@ class WebView(QtGui.QWidget):
 
         self.frame = self.webView.page().mainFrame()
 
+        # Enable developer tools for debugging loaded page.
         self.webView.settings().setAttribute(
             QtWebKit.QWebSettings.WebAttribute.DeveloperExtrasEnabled, True
         )
@@ -39,15 +40,9 @@ class WebView(QtGui.QWidget):
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.splitter)
-        QtGui.QShortcut(
-            QtGui.QKeySequence('F7'), self,
-            self.handleShowInspector
-        )
 
+        # Load the passed url.
         self.setUrl(url)
-
-    def handleShowInspector(self):
-        self.inspector.setShown(self.inspector.isHidden())
 
     def changedLocation(self):
         '''Handle location changed event.'''
