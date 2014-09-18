@@ -58,7 +58,8 @@ class Plugin(QObject):
                     .format(eventEnvironmentVariable, eventData)
                 )
             else:
-                context = decodedEventData.get('context', {})
+                data = decodedEventData.get('data', {})
+                context = data.get('context', {})
                 selection = context.get('selection', [])
 
                 # At present only a single entity which should represent an
