@@ -59,8 +59,7 @@ class Plugin(QObject):
                 )
             else:
                 data = decodedEventData.get('data', {})
-                context = data.get('context', {})
-                selection = context.get('selection', [])
+                selection = data.get('selection', [])
 
                 # At present only a single entity which should represent an
                 # ftrack List is supported.
