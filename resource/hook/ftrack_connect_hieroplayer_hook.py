@@ -6,6 +6,7 @@ import logging
 import sys
 import pprint
 import os
+import json
 
 import ftrack
 import ftrack_connect.application
@@ -97,11 +98,44 @@ class LaunchApplicationHook(object):
             event['data']['applicationIdentifier']
         )
 
+        # If application not `hieroplayer_with_review` return early.
+        if not applicationIdentifier.startswith('hieroplayer_with_review'):
+            return
+
         context = event['data'].copy()
+
+        # Rewrite original selection to a playlist.
+        context['selection'] = self._createPlaylistFromSelection(
+            context['selection']
+        )
 
         return self.launcher.launch(
             applicationIdentifier, context
         )
+
+    def _createPlaylistFromSelection(self, selection):
+        '''Return new selection with temporary playlist from *selection*.'''
+
+        # If selection is only one entity we don't need to create
+        # a playlist.
+        if len(selection) == 1:
+            return selection
+
+        playlist = []
+        for entity in selection:
+            playlist.append({
+                'id': entity['entityId'],
+                'type': entity['entityType']
+            })
+
+        playlist = ftrack.createTempData(json.dumps(playlist))
+
+        selection = [{
+            'entityType': 'temp',
+            'entityId': playlist.getId()
+        }]
+
+        return selection
 
 
 class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
@@ -115,12 +149,9 @@ class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
             application, context
         )
 
-        applicationIdentifier = application['identifier']
-
-        if applicationIdentifier.startswith('hieroplayer_with_review'):
-            environment['HIERO_PLUGIN_PATH'] = os.path.join(
-                FTRACK_CONNECT_HIEROPLAYER_PATH
-            )
+        environment['HIERO_PLUGIN_PATH'] = os.path.join(
+            FTRACK_CONNECT_HIEROPLAYER_PATH
+        )
 
         return environment
 
