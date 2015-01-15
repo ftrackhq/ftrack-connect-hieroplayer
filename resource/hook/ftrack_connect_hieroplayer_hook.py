@@ -100,12 +100,8 @@ class LaunchApplicationHook(object):
 
         event['data'] should contain:
 
-            context - Context of request to help guide how to launch the
-                      application.
-            actionData - Is passed and should contain the applicationIdentifier
-                         and other values that can be used to provide
-                         additional information about how the application
-                         should be launched.
+            *applicationIdentifier* to identify which application to start.
+            *selection* to load in review timeline.
         '''
         # Prevent further processing by other listeners.
         # TODO: Only do this when actually have managed to launch a relevant
@@ -113,7 +109,7 @@ class LaunchApplicationHook(object):
         event.stop()
 
         applicationIdentifier = (
-            event['data']['actionData']['applicationIdentifier']
+            event['data']['applicationIdentifier']
         )
 
         context = event['data'].copy()
@@ -124,7 +120,7 @@ class LaunchApplicationHook(object):
 
 
 class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
-    '''Launch nuke studio.'''
+    '''Launch HieroPlayer.'''
 
     def _getApplicationEnvironment(self, application, context):
         '''Modify and return environment with legacy plugins added.'''
