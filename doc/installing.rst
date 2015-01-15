@@ -3,34 +3,30 @@
 
 .. _installing:
 
-**********
-Installing
-**********
+************
+Installation
+************
 
-.. highlight:: bash
+Using ftrack connect
+--------------------
 
-Installation is simple with `pip <http://www.pip-installer.org/>`_::
+The ftrack connect hieroplayer review plugin is included in the build version
+of :term:`ftrack connect` to use it `download and run ftrack connect. <https://www.ftrack.com/downloads>`_
 
-    pip install ftrack-connect-hieroplayer
+Running from source
+-------------------
 
-Building from source
-====================
+You can clone the public repository::
 
-You can also build manually from the source for more control. First obtain a
-copy of the source by either downloading the
-`zipball <https://bitbucket.org/ftrack/ftrack-connect-hieroplayer/get/master.zip>`_ or
-cloning the public repository::
+    $ git clone git@bitbucket.org:ftrack/ftrack-connect-hieroplayer.git
 
-    git clone git@bitbucket.org:ftrack/ftrack-connect-hieroplayer.git
+Or download the
+`zipball <https://bitbucket.org/ftrack/ftrack-connect-hieroplayer/get/master.zip>`_
 
-Then you can build and install the package into your current Python
-site-packages folder::
-
-    python setup.py install
-
-Alternatively, just build locally and manage yourself::
-
-    python setup.py build
+Once you have a copy of the repository, copy the *Python* folder from the
+*resource* folder into the plugin folder for HIEROPLAYER. To find out where the
+plugin folder is on your system consult the
+`The Foundry developer documentation <http://docs.thefoundry.co.uk/products/hiero/developers/1.8/hieropythondevguide/setup.html>`_.
 
 Building documentation from source
 ----------------------------------
@@ -53,7 +49,9 @@ With a copy of the source it is also possible to run the unit tests::
 Dependencies
 ============
 
-* `Python <http://python.org>`_ >= 2.6, < 3
+* ftrack Python API (Download from your ftrack server and make available on
+  ``PYTHONPATH``)
+* `Hiero Player or Hiero <http://www.thefoundry.co.uk/products/hiero-product-family>`_
 
 Additional For building
 -----------------------

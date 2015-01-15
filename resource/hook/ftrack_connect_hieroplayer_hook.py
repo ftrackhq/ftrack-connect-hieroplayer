@@ -136,7 +136,6 @@ class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
 
         applicationIdentifier = application['identifier']
 
-        # Load Nuke specific environment such as legacy plugins.
         if applicationIdentifier.startswith('hieroplayer_with_review'):
             environment['HIERO_PLUGIN_PATH'] = os.path.join(
                 FTRACK_CONNECT_HIEROPLAYER_PATH
