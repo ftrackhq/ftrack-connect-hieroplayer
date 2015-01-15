@@ -1,5 +1,5 @@
 ..
-    :copyright: Copyright (c) 2014 ftrack
+    :copyright: Copyright (c) 2015 ftrack
 
 ###############################
 ftrack-connect-hieroplayer
@@ -27,7 +27,7 @@ Indices and tables
 Copyright and license
 *********************
 
-Copyright (c) 2014 ftrack
+Copyright (c) 2015 ftrack
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use
 this work except in compliance with the License. You may obtain a copy of the

@@ -1,5 +1,5 @@
 # :coding: utf-8
-# :copyright: Copyright (c) 2014 ftrack
+# :copyright: Copyright (c) 2015 ftrack
 
 '''ftrack-connect-hieroplayer documentation build configuration file.'''
 
@@ -26,7 +26,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'ftrack-connect-hieroplayer'
-copyright = u'2014, ftrack'
+copyright = u'2015, ftrack'
 
 # Version
 with open(
