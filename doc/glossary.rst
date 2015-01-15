@@ -15,3 +15,7 @@ Glossary
         .. seealso::
 
             :ref:`ftrack connect <ftrack-connect:about>`
+
+    ftrack connect package
+        ftrack connect package is a pre-built bundle of :term:`ftrack connect`
+        and the most commonly used :term:`ftrack connect` plugins.

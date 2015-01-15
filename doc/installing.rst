@@ -10,8 +10,8 @@ Installation
 Using ftrack connect
 --------------------
 
-The ftrack connect hieroplayer review plugin is included in the build version
-of :term:`ftrack connect` to use it `download and run ftrack connect. <https://www.ftrack.com/downloads>`_
+The ftrack connect hieroplayer review plugin is included in the built version
+of :term:`ftrack connect package` to use it `download and run ftrack connect. <https://www.ftrack.com/downloads>`_
 
 Running from source
 -------------------
