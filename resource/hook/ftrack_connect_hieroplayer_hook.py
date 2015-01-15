@@ -102,6 +102,10 @@ class LaunchApplicationHook(object):
         if not applicationIdentifier.startswith('hieroplayer_with_review'):
             return
 
+        # Rewrite to `hieroplayer` to make sure that the correct application is
+        # matched when starting.
+        applicationIdentifier = 'hieroplayer'
+
         context = event['data'].copy()
 
         # Rewrite original selection to a playlist.
