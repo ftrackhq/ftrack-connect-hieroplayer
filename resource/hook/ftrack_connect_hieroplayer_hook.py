@@ -57,23 +57,8 @@ class DiscoverApplicationsHook(object):
                 'actionIdentifier': self.identifier,
                 'label': label,
                 'icon': application.get('icon', 'default'),
-                'actionData': {
-                    'applicationIdentifier': applicationIdentifier
-                }
+                'applicationIdentifier': applicationIdentifier
             })
-
-            if applicationIdentifier.startswith('premiere_pro_cc'):
-                items.append({
-                    'actionIdentifier': self.identifier,
-                    'label': '{label} with latest version'.format(
-                        label=label
-                    ),
-                    'icon': application.get('icon', 'default'),
-                    'actionData': {
-                        'launchWithLatest': True,
-                        'applicationIdentifier': applicationIdentifier
-                    }
-                })
 
         return {
             'items': items
