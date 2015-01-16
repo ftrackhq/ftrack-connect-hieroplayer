@@ -386,7 +386,7 @@ class Plugin(QObject):
             else:
                 trackItem.setTimelineIn(0)
                 trackItem.setTimelineOut(
-                    trackItem.sourceDuration()-1
+                    trackItem.sourceDuration() - 1
                 )
 
             track.addItem(trackItem)
