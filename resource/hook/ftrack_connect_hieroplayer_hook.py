@@ -135,7 +135,7 @@ class LaunchApplicationHook(object):
         playlist = ftrack.createTempData(json.dumps(playlist))
 
         selection = [{
-            'entityType': 'temp',
+            'entityType': 'tempdata',
             'entityId': playlist.getId()
         }]
 
