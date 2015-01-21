@@ -5,7 +5,7 @@
 ftrack-connect-hieroplayer
 ###############################
 
-ftrack connect review plugin for The Foundry's HIEROPLAYER.
+ftrack connect review plugin for :term:`The Foundry`'s :term:`HIEROPLAYER`.
 
 .. toctree::
     :maxdepth: 1
@@ -14,6 +14,7 @@ ftrack connect review plugin for The Foundry's HIEROPLAYER.
     using
     api_reference/index
     glossary
+    release/index
 
 ******************
 Indices and tables
