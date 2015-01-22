@@ -24,8 +24,8 @@ Or download the
 `zipball <https://bitbucket.org/ftrack/ftrack-connect-hieroplayer/get/master.zip>`_
 
 Once you have a copy of the repository, copy the *Python* folder from the
-*resource* folder into the plugin folder for HIEROPLAYER. To find out where the
-plugin folder is on your system consult the
+*resource* folder into the plugin folder for :term:`HIEROPLAYER`.
+To find out where the plugin folder is on your system consult the
 `The Foundry developer documentation <http://docs.thefoundry.co.uk/products/hiero/developers/1.8/hieropythondevguide/setup.html>`_.
 
 Building documentation from source
@@ -51,7 +51,7 @@ Dependencies
 
 * ftrack Python API (Download from your ftrack server and make available on
   ``PYTHONPATH``)
-* `Hiero Player or Hiero <http://www.thefoundry.co.uk/products/hiero-product-family>`_
+* `HIEROPLAYER or Hiero <http://www.thefoundry.co.uk/products/hiero-product-family>`_
 
 Additional For building
 -----------------------

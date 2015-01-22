@@ -19,3 +19,12 @@ Glossary
     ftrack connect package
         ftrack connect package is a pre-built bundle of :term:`ftrack connect`
         and the most commonly used :term:`ftrack connect` plugins.
+
+    HIEROPLAYER
+        HIEROPLAYER is a desktop review tool by :term:`TheFoundry` that lets
+        you playback every shot on the VFX timeline and compare versions of
+        renders quickly. See `website for more information <https://www.thefoundry.co.uk/products/hiero-product-family/hieroplayer/>`_
+
+    The Foundry
+        The Foundry Visionmongers is a visual effects software development
+        company. See `website for more information <https://www.thefoundry.co.uk>`_
