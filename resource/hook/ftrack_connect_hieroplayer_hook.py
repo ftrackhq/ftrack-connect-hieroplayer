@@ -98,13 +98,11 @@ class LaunchApplicationHook(object):
             event['data']['applicationIdentifier']
         )
 
-        # If application not `hieroplayer_with_review` return early.
-        if not applicationIdentifier.startswith('hieroplayer_with_review'):
-            return
-
-        # Rewrite to `hieroplayer` to make sure that the correct application is
-        # matched when starting.
-        applicationIdentifier = 'hieroplayer'
+        # If started from custom 'Launch HieroPlayer' menu in ftrack
+        # the applicationIdentifier is missing version. Rewrite
+        # to match any hieroplayer version.
+        if applicationIdentifier == 'hieroplayer_with_review':
+            applicationIdentifier = 'hieroplayer*'
 
         context = event['data'].copy()
 
@@ -184,7 +182,7 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
             applications.extend(self._searchFilesystem(
                 expression=prefix + ['HieroPlayer.*', 'HieroPlayer\d[\w.]+.app'],
                 label='Review with HieroPlayer {version}',
-                applicationIdentifier='hieroplayer_with_review_{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
             ))
 
@@ -194,7 +192,7 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
             applications.extend(self._searchFilesystem(
                 expression=prefix + ['HieroPlayer.*', 'HieroPlayer\d.+.exe'],
                 label='Review with HieroPlayer {version}',
-                applicationIdentifier='hieroplayer_with_review_{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
             ))
 
