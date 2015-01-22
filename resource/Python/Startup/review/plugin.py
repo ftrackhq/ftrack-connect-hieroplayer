@@ -84,7 +84,7 @@ class Plugin(QObject):
 
         else:
             self.serverUrl = serverUrl or appServerUrl
-            url = self.getViewUrl('freview_nav_v1')
+            url = self.getViewUrl('review_navigation')
 
         if not self.api:
             url = self.getViewUrl('api_error')
@@ -94,16 +94,14 @@ class Plugin(QObject):
         self.networkAccessManager = QNetworkAccessManager()
         self.networkAccessManager.setCookieJar(cookieJar)
 
-        # Construct ftrack panels.
-        self.loginPanel = _WebView('ftrack Login', url=url, plugin=self)
-        hiero.ui.windowManager().addWindow(self.loginPanel)
-
-        self.timelinePanel = _WebView('ftrack Timeline', plugin=self)
+        self.timelinePanel = _WebView('ftrack Timeline', plugin=self, url=url)
         hiero.ui.windowManager().addWindow(self.timelinePanel)
 
         self.actionPanel = _WebView('ftrack Action', plugin=self)
         self.actionPanel.setMinimumWidth(500)
         hiero.ui.windowManager().addWindow(self.actionPanel)
+
+        hiero.ui.setWorkspace('ftrack')
 
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
@@ -123,17 +121,13 @@ class Plugin(QObject):
                 })
             )
 
-            urlTemplate = (
-                '{0}/widget?theme=tf&view={{0}}&itemId=freview'
-                '&controller=widget&widgetCfg={1}'
-                .format(self.serverUrl, configuration)
+            url = self.api.getWebWidgetUrl(
+                name, 'tf', entityId=self.entityId, entityType=self.entityType
             )
-            url = urlTemplate.format(name)
 
-            if self.entityId and self.entityType:
-                url = '{0}&entityId={1}&entityType={2}'.format(
-                    url, self.entityId, self.entityType
-                )
+            url = '{baseUrl}&widgetCfg={configuration}'.format(
+                baseUrl=url, configuration=configuration
+            )
 
         return url
 
@@ -209,18 +203,8 @@ class Plugin(QObject):
 
         self._loaded = True
 
-        # Display authenticated page.
-        # TODO: Find a way to change focus to Viewer tab / close this tab.
-        self.loginPanel.setUrl(
-            self.getViewUrl('authenticated')
-        )
-
-        # Load other views.
-        self.timelinePanel.setUrl(
-            self.getViewUrl('freview_nav_v1')
-        )
         self.actionPanel.setUrl(
-            self.getViewUrl('freview_action_v1')
+            self.getViewUrl('review_action')
         )
 
         # Ensure action panel updated when playback clip changed.
