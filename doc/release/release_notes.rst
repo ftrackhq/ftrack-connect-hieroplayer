@@ -7,8 +7,9 @@
 Release notes
 *************
 
-.. release:: next
-    
+.. release:: 0.1.1
+    :date: 2015-01-23
+
     .. change:: changed
 
         Required `ftrack server <http://rtd.ftrack.com/docs/ftrack/en/3.0.5/release/release_notes.html>`_ version is 3.0.5 or higher.
