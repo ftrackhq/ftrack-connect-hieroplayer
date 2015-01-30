@@ -190,7 +190,24 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
             prefix = ['C:\\', 'Program Files.*']
 
             applications.extend(self._searchFilesystem(
-                expression=prefix + ['The Foundry', 'HieroPlayer\d.+', 'hieroplayer.exe'],
+                expression=prefix + [
+                    'The Foundry', 'HieroPlayer\d.+', 'hieroplayer.exe'
+                ],
+                label='Review with HieroPlayer {version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
+                icon='hieroplayer'
+            ))
+
+            # Somewhere along the way The Foundry changed the default install
+            # directory. Add the old directory as expression to find old
+            # installations of HieroPlayer as well.
+            #
+            # TODO: Refactor this once ``_searchFilesystem`` is more
+            # sophisticated.
+            applications.extend(self._searchFilesystem(
+                expression=prefix + [
+                    'The Foundry', 'HieroPlayer\d.+', 'hieroplayer.exe'
+                ],
                 label='Review with HieroPlayer {version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
