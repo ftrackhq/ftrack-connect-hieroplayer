@@ -191,7 +191,7 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
 
             applications.extend(self._searchFilesystem(
                 expression=prefix + [
-                    'The Foundry', 'HieroPlayer\d.+', 'hieroplayer.exe'
+                    'HieroPlayer\d.+', 'hieroplayer.exe'
                 ],
                 label='Review with HieroPlayer {version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
