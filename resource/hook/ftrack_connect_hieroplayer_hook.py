@@ -213,6 +213,19 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 icon='hieroplayer'
             ))
 
+        elif sys.platform == 'linux2':
+
+            applications.extend(self._searchFilesystem(
+                versionExpression=r'HieroPlayer(?P<version>.*)\/.+$',
+                expression=[
+                    '/', 'usr', 'local', 'HieroPlayer.*',
+                    'bin', 'HieroPlayer\d.+'
+                ],
+                label='Review with HieroPlayer {version}',
+                applicationIdentifier='hiero_{version}',
+                icon='hieroplayer'
+            ))
+
         self.logger.debug(
             'Discovered applications:\n{0}'.format(
                 pprint.pformat(applications)
