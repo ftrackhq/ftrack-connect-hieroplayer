@@ -7,7 +7,8 @@
 Release notes
 *************
 
-.. release:: next
+.. release:: 0.1.3
+    :date: 2015-04-17
 
     .. change:: fix
         :tags: Hook, Centos
