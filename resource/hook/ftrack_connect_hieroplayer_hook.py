@@ -57,6 +57,8 @@ class DiscoverApplicationsHook(object):
             items.append({
                 'actionIdentifier': self.identifier,
                 'label': label,
+                'variant': application.get('variant', None),
+                'description': application.get('description', None),
                 'icon': application.get('icon', 'default'),
                 'applicationIdentifier': applicationIdentifier
             })
@@ -167,7 +169,9 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
 
             dict(
                 'identifier': 'name_version',
-                'label': 'Name version',
+                'label': 'Name',
+                'variant': 'version',
+                'description': 'description',
                 'path': 'Absolute path to the file',
                 'version': 'Version of the application',
                 'icon': 'URL or name of predefined icon'
@@ -181,7 +185,8 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
 
             applications.extend(self._searchFilesystem(
                 expression=prefix + ['HieroPlayer.*', 'HieroPlayer\d[\w.]+.app'],
-                label='Review with HieroPlayer {version}',
+                label='Review with HieroPlayer',
+                variant='{version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
             ))
@@ -193,7 +198,8 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 expression=prefix + [
                     'HieroPlayer\d.+', 'hieroplayer.exe'
                 ],
-                label='Review with HieroPlayer {version}',
+                label='Review with HieroPlayer',
+                variant='{version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
             ))
@@ -208,7 +214,8 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 expression=prefix + [
                     'The Foundry', 'HieroPlayer\d.+', 'hieroplayer.exe'
                 ],
-                label='Review with HieroPlayer {version}',
+                label='Review with HieroPlayer',
+                variant='{version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
             ))
@@ -221,7 +228,8 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                     '/', 'usr', 'local', 'HieroPlayer.*',
                     'bin', 'HieroPlayer\d.+'
                 ],
-                label='Review with HieroPlayer {version}',
+                label='Review with HieroPlayer',
+                variant='{version}',
                 applicationIdentifier='hiero_{version}',
                 icon='hieroplayer'
             ))
