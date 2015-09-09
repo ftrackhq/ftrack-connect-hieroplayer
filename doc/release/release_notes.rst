@@ -7,6 +7,14 @@
 Release notes
 *************
 
+.. release:: 0.1.4
+    :date: 2015-09-09
+
+    .. change:: fix
+        :tags: Hook
+
+        Added support for `variant` instead of version number in label.
+
 .. release:: 0.1.3
     :date: 2015-04-17
 
