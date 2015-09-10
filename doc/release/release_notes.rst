@@ -26,8 +26,10 @@ Release notes
 .. release:: 0.1.2
     :date: 2015-01-30
 
-    Added alternative installation directory to search path when detecting installed
-    HieroPlayer versions.
+    .. change:: fix
+
+        Added alternative installation directory to search path when detecting
+        installed HieroPlayer versions.
 
 .. release:: 0.1.1
     :date: 2015-01-23
