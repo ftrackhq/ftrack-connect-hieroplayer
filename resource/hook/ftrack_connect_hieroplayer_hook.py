@@ -249,8 +249,7 @@ def get_version_information(event):
     return [
         dict(
             name='ftrack connect hieroplayer',
-            version=ftrack_connect_hieroplayer.__version__,
-            core=True
+            version=ftrack_connect_hieroplayer.__version__
         )
     ]
 
