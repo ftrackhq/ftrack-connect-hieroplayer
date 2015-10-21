@@ -10,6 +10,7 @@ import json
 
 import ftrack
 import ftrack_connect.application
+import ftrack_connect_hieroplayer
 
 
 ACTION_IDENTIFIER = 'ftrack-connect-launch-hieroplayer_with_review'
@@ -243,6 +244,16 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
         return applications
 
 
+def get_version_information(event):
+    '''Return version information.'''
+    return [
+        dict(
+            name='ftrack connect hieroplayer',
+            version=ftrack_connect_hieroplayer.__version__
+        )
+    ]
+
+
 def register(registry, **kw):
     '''Register hooks for legacy plugins.'''
 
@@ -277,4 +288,9 @@ def register(registry, **kw):
         LaunchApplicationHook(
             ApplicationLauncher(applicationStore)
         )
+    )
+
+    ftrack.EVENT_HUB.subscribe(
+        'topic=ftrack.connect.plugin.debug-information',
+        get_version_information
     )
