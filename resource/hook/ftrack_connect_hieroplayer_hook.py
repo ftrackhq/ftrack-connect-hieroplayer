@@ -7,6 +7,7 @@ import sys
 import pprint
 import os
 import json
+import re
 
 import ftrack
 import ftrack_connect.application
@@ -192,6 +193,16 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 icon='hieroplayer'
             ))
 
+            applications.extend(self._searchFilesystem(
+                expression=prefix + ['Nuke.*', 'NukeStudio\d[\w.]+.app'],
+                label='Review with HieroPlayer',
+                variant='{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
+                icon='hieroplayer',
+                launchArguments=['--player']
+
+            ))
+
         elif sys.platform == 'win32':
             prefix = ['C:\\', 'Program Files.*']
 
@@ -221,6 +232,20 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 icon='hieroplayer'
             ))
 
+            version_expression = re.compile(
+                r'Nuke(?P<version>[\d.]+[\w\d.]*)'
+            )
+
+            applications.extend(self._searchFilesystem(
+                expression=prefix + ['Nuke.*', 'Nuke\d.+.exe'],
+                versionExpression=version_expression,
+                label='Review with HieroPlayer',
+                variant='{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
+                icon='hieroplayer',
+                launchArguments=['--player']
+            ))
+
         elif sys.platform == 'linux2':
 
             applications.extend(self._searchFilesystem(
@@ -231,8 +256,17 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 ],
                 label='Review with HieroPlayer',
                 variant='{version}',
-                applicationIdentifier='hiero_{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
                 icon='hieroplayer'
+            ))
+
+            applications.extend(self._searchFilesystem(
+                expression=['/', 'usr', 'local', 'Nuke.*', 'Nuke\d.+'],
+                label='Review with HieroPlayer',
+                variant='{version}',
+                applicationIdentifier='hieroplayer_{version}_with_review',
+                icon='hieroplayer',
+                launchArguments=['--player']
             ))
 
         self.logger.debug(
