@@ -7,6 +7,13 @@
 Release notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: fix
+        :tags: Hook
+
+        Hiero player doesn't get discovered with nuke studio installation.
+
 .. release:: 0.1.4
     :date: 2015-09-09
 
