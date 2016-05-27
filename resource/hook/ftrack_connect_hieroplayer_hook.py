@@ -194,13 +194,11 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
             ))
 
             applications.extend(self._searchFilesystem(
-                expression=prefix + ['Nuke.*', 'NukeStudio\d[\w.]+.app'],
+                expression=prefix + ['Nuke.*', 'HieroPlayer\d[\w.]+.app'],
                 label='Review with HieroPlayer',
                 variant='{version}',
                 applicationIdentifier='hieroplayer_{version}_with_review',
-                icon='hieroplayer',
-                launchArguments=['--player']
-
+                icon='hieroplayer'
             ))
 
         elif sys.platform == 'win32':
