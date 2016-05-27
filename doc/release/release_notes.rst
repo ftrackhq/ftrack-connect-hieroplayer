@@ -7,7 +7,7 @@
 Release notes
 *************
 
-.. release:: Upcomin
+.. release:: Upcoming
     .. change:: fix
         :tags: Hook
 
