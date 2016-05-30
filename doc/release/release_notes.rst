@@ -8,6 +8,10 @@ Release notes
 *************
 
 .. release:: Upcoming
+    .. change:: fix
+        :tags: Hook
+
+        Hiero player doesn't get discovered with nuke studio 
 
     .. change:: fix
         :tags: API
