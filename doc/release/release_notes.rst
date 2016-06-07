@@ -7,16 +7,18 @@
 Release notes
 *************
 
-.. release:: Upcoming
+.. release:: 0.1.5
+    :date: 2016-06-07
+
     .. change:: fix
         :tags: Hook
 
-        Hiero player doesn't get discovered with nuke studio 
+        Hiero Player doesn't get discovered in versions >9.0.
 
     .. change:: fix
         :tags: API
 
-        Hiero Player is not lading correctly in latest version.
+        Hiero Player is not lading correctly in versions >9.0.
 
 .. release:: 0.1.4
     :date: 2015-09-09
