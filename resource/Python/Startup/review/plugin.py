@@ -182,7 +182,7 @@ class Plugin(QObject):
                 [location]
             )
 
-            is_available = component_availability.value() == 100.0
+            is_available = component_availability.values()[0] == 100.0
 
             if not is_available:
                 raise IOError(
