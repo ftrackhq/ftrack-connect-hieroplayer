@@ -14,9 +14,15 @@ from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
+import ftrack
 from ftrack_api import Session
 
 from .web_view import WebView as _WebView
+
+try:
+    ftrack.setup()
+except:
+    pass
 
 
 class Plugin(QObject):
@@ -103,6 +109,24 @@ class Plugin(QObject):
 
         hiero.ui.setWorkspace('ftrack')
 
+    def _identify_entity_(self, entity_id):
+        '''Identify provided *entity*.'''
+        entity_types = [
+            'Context',
+            'AssetVersion',
+            'FileComponent'
+        ]
+
+        entity = None
+        for entity_type in entity_types:
+            _entity = self._session.get(entity_type, entity_id)
+            has_type = getattr(_entity, 'entity_type', None)
+            if has_type:
+                entity = _entity
+                break
+
+        return entity
+
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
         url = os.path.join(
@@ -120,7 +144,10 @@ class Plugin(QObject):
                     'undockable': False
                 })
             )
-            ftrack_entity = self._session.get('Context', self.entityId)
+            ftrack_entity = self._identify_entity_(self.entityId)
+            if not ftrack_entity:
+                return
+
             url = self._session.get_widget_url(
                 name, ftrack_entity, 'tf'
             )
@@ -148,12 +175,14 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            locations = self._session.query('Location').all()
+            location = self._session.pick_location()
             ftrack_component = self._session.get('FileComponent', componentId)
 
-            is_available = ftrack_component.get_availability(
-                locations
+            component_availability = ftrack_component.get_availability(
+                [location]
             )
+
+            is_available = component_availability.value() == 100.0
 
             if not is_available:
                 raise IOError(
@@ -161,7 +190,7 @@ class Plugin(QObject):
                     'location for component accessible.'.format(componentId)
                 )
 
-            path = ftrack_component.get_filesystem_path()
+            path = location.get_filesystem_path(ftrack_component)
             self._componentPathCache[componentId] = path
 
         return path
