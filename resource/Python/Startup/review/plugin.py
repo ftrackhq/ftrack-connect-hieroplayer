@@ -14,6 +14,8 @@ from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
+from ftrack_api import Session
+
 from .web_view import WebView as _WebView
 
 
@@ -28,8 +30,9 @@ class Plugin(QObject):
             __name__ + '.' + self.__class__.__name__
         )
 
+        self._session = Session()
+
         self._loaded = False
-        self._api = None
 
         self._project = None
         self._previousSequence = None
@@ -86,9 +89,6 @@ class Plugin(QObject):
             self.serverUrl = serverUrl or appServerUrl
             url = self.getViewUrl('review_navigation')
 
-        if not self.api:
-            url = self.getViewUrl('api_error')
-
         # Create cookie jar to store authentication credentials in for session.
         cookieJar = QNetworkCookieJar()
         self.networkAccessManager = QNetworkAccessManager()
@@ -120,9 +120,9 @@ class Plugin(QObject):
                     'undockable': False
                 })
             )
-
-            url = self.api.getWebWidgetUrl(
-                name, 'tf', entityId=self.entityId, entityType=self.entityType
+            ftrack_entity = self._session.get('Context', self.entityId)
+            url = self._session.get_widget_url(
+                name, ftrack_entity
             )
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
@@ -130,25 +130,6 @@ class Plugin(QObject):
             )
 
         return url
-
-    @property
-    def api(self):
-        '''Return ftrack API.'''
-        if not self._api:
-            try:
-                import ftrack as ftrack
-                ftrack.setup(actions=False)
-            except ImportError:
-                self.logger.warning(
-                    'Could not load ftrack Python API. Please check it is '
-                    'available on the PYTHONPATH.'
-                )
-                return False
-            else:
-                self._api = ftrack
-                self.logger.debug('Loaded ftrack Python API successfully.')
-
-        return self._api
 
     def _markBrokenClip(self, versionId):
         '''Mark clip representing version with *versionId* as unplayable.'''
@@ -167,16 +148,20 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            location = self.api.pickLocation(componentId)
+            current_location = self._session.pick_location()
+            ftrack_component = self._session.get('FileComponent', componentId)
+            is_available = ftrack_component.get_availability(
+                [current_location]
+            )
+            print is_available
 
-            if not location:
+            if not is_available:
                 raise IOError(
                     'Could not retrieve file path for component {0} as no '
                     'location for component accessible.'.format(componentId)
                 )
 
-            component = location.getComponent(componentId)
-            path = component.getFilesystemPath()
+            path = ftrack_component.get_filesystem_path()
             self._componentPathCache[componentId] = path
 
         return path
