@@ -20,7 +20,7 @@ from ftrack_api import Session
 from .web_view import WebView as _WebView
 
 try:
-    ftrack.setup()
+    ftrack.setup(actions=False)
 except:
     pass
 
