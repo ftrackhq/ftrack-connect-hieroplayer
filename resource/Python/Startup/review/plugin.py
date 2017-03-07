@@ -122,7 +122,7 @@ class Plugin(QObject):
             )
             ftrack_entity = self._session.get('Context', self.entityId)
             url = self._session.get_widget_url(
-                name, ftrack_entity
+                name, ftrack_entity, 'dark'
             )
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
@@ -148,12 +148,12 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            current_location = self._session.pick_location()
+            locations = self._session.query('Location').all()
             ftrack_component = self._session.get('FileComponent', componentId)
+
             is_available = ftrack_component.get_availability(
-                [current_location]
+                locations
             )
-            print is_available
 
             if not is_available:
                 raise IOError(
