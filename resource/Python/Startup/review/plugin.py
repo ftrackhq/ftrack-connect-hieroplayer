@@ -122,7 +122,7 @@ class Plugin(QObject):
             )
             ftrack_entity = self._session.get('Context', self.entityId)
             url = self._session.get_widget_url(
-                name, ftrack_entity, 'dark'
+                name, ftrack_entity, 'tf'
             )
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
