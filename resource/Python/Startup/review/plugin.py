@@ -19,10 +19,13 @@ from ftrack_api import Session
 
 from .web_view import WebView as _WebView
 
+
 try:
-    ftrack.setup(actions=False)
-except:
-    pass
+    import ftrack
+except ImportError:
+    raise Exception(
+        'ftrack legacy api not found in PYTHONPATH.'
+    )
 
 
 class Plugin(QObject):
@@ -109,24 +112,6 @@ class Plugin(QObject):
 
         hiero.ui.setWorkspace('ftrack')
 
-    def _identify_entity_(self, entity_id):
-        '''Identify provided *entity*.'''
-        entity_types = [
-            'Context',
-            'AssetVersion',
-            'FileComponent'
-        ]
-
-        entity = None
-        for entity_type in entity_types:
-            _entity = self._session.get(entity_type, entity_id)
-            has_type = getattr(_entity, 'entity_type', None)
-            if has_type:
-                entity = _entity
-                break
-
-        return entity
-
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
         url = os.path.join(
@@ -144,12 +129,9 @@ class Plugin(QObject):
                     'undockable': False
                 })
             )
-            ftrack_entity = self._identify_entity_(self.entityId)
-            if not ftrack_entity:
-                return
 
-            url = self._session.get_widget_url(
-                name, ftrack_entity, 'tf'
+            url = self.api.getWebWidgetUrl(
+                name, 'tf', entityId=self.entityId, entityType=self.entityType
             )
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
@@ -175,21 +157,8 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            location = self._session.pick_location()
-            ftrack_component = self._session.get('FileComponent', componentId)
-
-            component_availability = ftrack_component.get_availability(
-                [location]
-            )
-
-            is_available = component_availability.values()[0] == 100.0
-
-            if not is_available:
-                raise IOError(
-                    'Could not retrieve file path for component {0} as no '
-                    'location for component accessible.'.format(componentId)
-                )
-
+            ftrack_component = session.get('FileComponent', componentId)
+            location = session.pick_location(component=ftrack_component)
             path = location.get_filesystem_path(ftrack_component)
             self._componentPathCache[componentId] = path
 
