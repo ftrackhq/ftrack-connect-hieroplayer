@@ -14,7 +14,6 @@ from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
-import ftrack
 from ftrack_api import Session
 
 from .web_view import WebView as _WebView
@@ -22,6 +21,7 @@ from .web_view import WebView as _WebView
 
 try:
     import ftrack
+    ftrack.setup(actions=False)
 except ImportError:
     raise Exception(
         'ftrack legacy api not found in PYTHONPATH.'
@@ -130,7 +130,7 @@ class Plugin(QObject):
                 })
             )
 
-            url = self.api.getWebWidgetUrl(
+            url = ftrack.getWebWidgetUrl(
                 name, 'tf', entityId=self.entityId, entityType=self.entityType
             )
 
