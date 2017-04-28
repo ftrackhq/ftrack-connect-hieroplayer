@@ -14,8 +14,7 @@ from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
-from ftrack_api import Session
-
+import ftrack_api
 from .web_view import WebView as _WebView
 
 
@@ -39,7 +38,7 @@ class Plugin(QObject):
             __name__ + '.' + self.__class__.__name__
         )
 
-        self._session = Session()
+        self._session = ftrack_api.Session()
 
         self._loaded = False
 
