@@ -116,12 +116,14 @@ class Plugin(QObject):
 
         try:
             ftrack.setup()
-        except Exception:
-            # initialize ftrack legacy api, ignore hub initalization exteption.
+        except Exception as error:
+            self.logger.debug(error)
+            # Initialize ftrack legacy api to register locations,
+            # ignore hub Exceptions.
             pass
 
         self._api = ftrack
-        self.logger.debug('Loaded ftrack Python API successfully.')
+        self.logger.debug('Ftrack legacy python API successfully loaded.')
         return self._api
 
     def getViewUrl(self, name):
