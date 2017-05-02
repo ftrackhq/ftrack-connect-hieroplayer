@@ -7,6 +7,13 @@
 Release notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: changed
+        :tags: API
+
+        Hiero Player plugin does not use new ftrack-python-api.
+
 .. release:: 0.1.5
     :date: 2016-06-07
 
