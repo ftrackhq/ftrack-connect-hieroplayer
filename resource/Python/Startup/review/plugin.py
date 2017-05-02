@@ -156,8 +156,8 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            ftrack_component = session.get('Component', componentId)
-            location = session.pick_location(component=ftrack_component)
+            ftrack_component = self._session.get('Component', componentId)
+            location = self._session.pick_location(component=ftrack_component)
             path = location.get_filesystem_path(ftrack_component)
             self._componentPathCache[componentId] = path
 
