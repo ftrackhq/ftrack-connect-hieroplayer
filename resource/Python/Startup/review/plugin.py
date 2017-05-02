@@ -20,7 +20,7 @@ from .web_view import WebView as _WebView
 
 try:
     import ftrack
-    ftrack.setup(actions=False)
+    ftrack.setup()
 except ImportError:
     raise Exception(
         'ftrack legacy api not found in PYTHONPATH.'
@@ -160,6 +160,12 @@ class Plugin(QObject):
             location = self._session.pick_location(component=ftrack_component)
             path = location.get_filesystem_path(ftrack_component)
             self._componentPathCache[componentId] = path
+
+            self.logger.debug(
+                'Found path :{0} for component :{1} in location :{2}'.format(
+                    path, ftrack_component, location
+                )
+            )
 
         return path
 
