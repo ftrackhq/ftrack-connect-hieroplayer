@@ -18,15 +18,6 @@ import ftrack_api
 from .web_view import WebView as _WebView
 
 
-try:
-    import ftrack
-    ftrack.setup()
-except ImportError:
-    raise Exception(
-        'ftrack legacy api not found in PYTHONPATH.'
-    )
-
-
 class Plugin(QObject):
     '''ftrack connect HIEROPLAYER plugin.'''
 
@@ -39,7 +30,7 @@ class Plugin(QObject):
         )
 
         self._session = ftrack_api.Session()
-
+        self._api = None
         self._loaded = False
 
         self._project = None
@@ -97,6 +88,9 @@ class Plugin(QObject):
             self.serverUrl = serverUrl or appServerUrl
             url = self.getViewUrl('review_navigation')
 
+        if not self.api:
+            url = self.getViewUrl('api_error')
+
         # Create cookie jar to store authentication credentials in for session.
         cookieJar = QNetworkCookieJar()
         self.networkAccessManager = QNetworkAccessManager()
@@ -110,6 +104,25 @@ class Plugin(QObject):
         hiero.ui.windowManager().addWindow(self.actionPanel)
 
         hiero.ui.setWorkspace('ftrack')
+
+    @property
+    def api(self):
+        try:
+            import ftrack
+        except ImportError:
+            raise Exception(
+                'ftrack legacy api not found in PYTHONPATH.'
+            )
+
+        try:
+            ftrack.setup()
+        except Exception:
+            # initialize ftrack legacy api, ignore hub initalization exteption.
+            pass
+
+        self._api = ftrack
+        self.logger.debug('Loaded ftrack Python API successfully.')
+        return self._api
 
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
@@ -129,7 +142,7 @@ class Plugin(QObject):
                 })
             )
 
-            url = ftrack.getWebWidgetUrl(
+            url = self.api.getWebWidgetUrl(
                 name, 'tf', entityId=self.entityId, entityType=self.entityType
             )
 
