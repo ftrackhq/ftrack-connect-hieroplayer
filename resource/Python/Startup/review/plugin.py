@@ -9,8 +9,8 @@ import base64
 import logging
 import uuid
 
-from PySide.QtNetwork import *
-from PySide.QtCore import QObject, Slot
+from QtExt.QtNetwork import *
+from QtExt.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
