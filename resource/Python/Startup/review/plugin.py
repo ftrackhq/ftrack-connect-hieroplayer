@@ -14,6 +14,7 @@ from PySide.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
+import ftrack_api
 from .web_view import WebView as _WebView
 
 
@@ -28,8 +29,9 @@ class Plugin(QObject):
             __name__ + '.' + self.__class__.__name__
         )
 
-        self._loaded = False
+        self._session = ftrack_api.Session()
         self._api = None
+        self._loaded = False
 
         self._project = None
         self._previousSequence = None
@@ -103,6 +105,27 @@ class Plugin(QObject):
 
         hiero.ui.setWorkspace('ftrack')
 
+    @property
+    def api(self):
+        try:
+            import ftrack
+        except ImportError:
+            raise Exception(
+                'ftrack legacy api not found in PYTHONPATH.'
+            )
+
+        try:
+            ftrack.setup()
+        except Exception as error:
+            self.logger.debug(error)
+            # Initialize ftrack legacy api to register locations,
+            # ignore hub Exceptions.
+            pass
+
+        self._api = ftrack
+        self.logger.debug('Ftrack legacy python API successfully loaded.')
+        return self._api
+
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
         url = os.path.join(
@@ -131,25 +154,6 @@ class Plugin(QObject):
 
         return url
 
-    @property
-    def api(self):
-        '''Return ftrack API.'''
-        if not self._api:
-            try:
-                import ftrack as ftrack
-                ftrack.setup(actions=False)
-            except ImportError:
-                self.logger.warning(
-                    'Could not load ftrack Python API. Please check it is '
-                    'available on the PYTHONPATH.'
-                )
-                return False
-            else:
-                self._api = ftrack
-                self.logger.debug('Loaded ftrack Python API successfully.')
-
-        return self._api
-
     def _markBrokenClip(self, versionId):
         '''Mark clip representing version with *versionId* as unplayable.'''
         if not self._loaded:
@@ -167,7 +171,8 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            location = self.api.pickLocation(componentId)
+            ftrack_component = self._session.get('Component', componentId)
+            location = self._session.pick_location(component=ftrack_component)
 
             if not location:
                 raise IOError(
@@ -175,9 +180,21 @@ class Plugin(QObject):
                     'location for component accessible.'.format(componentId)
                 )
 
-            component = location.getComponent(componentId)
-            path = component.getFilesystemPath()
+            try:
+                path = location.get_filesystem_path(ftrack_component)
+            except (
+                ftrack_api.exception.AccessorFilesystemPathError,
+                ftrack_api.exception.AccessorUnsupportedOperationError
+            ) as e:
+                raise IOError(e)
+
             self._componentPathCache[componentId] = path
+
+            self.logger.debug(
+                u'Found path: {0} for component: {1} in location: {2}'.format(
+                    path, ftrack_component, location
+                )
+            )
 
         return path
 

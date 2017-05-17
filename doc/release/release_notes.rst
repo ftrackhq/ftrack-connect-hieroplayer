@@ -7,6 +7,16 @@
 Release notes
 *************
 
+.. release:: Upcoming
+
+    .. change:: changed
+        :tags: API
+
+        The integration now uses the new API to resolve file paths and can be
+        used to review components only accessible from the new API. Legacy
+        locations are still supported through the location compatibility plugin
+        in ftrack Connect.
+
 .. release:: 0.1.5
     :date: 2016-06-07
 
