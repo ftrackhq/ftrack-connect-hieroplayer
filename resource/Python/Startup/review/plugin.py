@@ -173,6 +173,13 @@ class Plugin(QObject):
         if path is None:
             ftrack_component = self._session.get('Component', componentId)
             location = self._session.pick_location(component=ftrack_component)
+
+            if not location:
+                raise IOError(
+                    'Could not retrieve file path for component {0} as no '
+                    'location for component accessible.'.format(componentId)
+                )
+
             path = location.get_filesystem_path(ftrack_component)
             self._componentPathCache[componentId] = path
 
