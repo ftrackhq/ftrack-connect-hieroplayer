@@ -180,7 +180,14 @@ class Plugin(QObject):
                     'location for component accessible.'.format(componentId)
                 )
 
-            path = location.get_filesystem_path(ftrack_component)
+            try:
+                path = location.get_filesystem_path(ftrack_component)
+            except (
+                ftrack_api.exception.AccessorFilesystemPathError,
+                ftrack_api.exception.AccessorUnsupportedOperationError
+            ) as e:
+                raise IOError(e)
+
             self._componentPathCache[componentId] = path
 
             self.logger.debug(
