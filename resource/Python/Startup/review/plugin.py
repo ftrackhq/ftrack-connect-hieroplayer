@@ -191,7 +191,7 @@ class Plugin(QObject):
             self._componentPathCache[componentId] = path
 
             self.logger.debug(
-                u'Found path :{0} for component :{1} in location :{2}'.format(
+                u'Found path: {0} for component: {1} in location: {2}'.format(
                     path, ftrack_component, location
                 )
             )
