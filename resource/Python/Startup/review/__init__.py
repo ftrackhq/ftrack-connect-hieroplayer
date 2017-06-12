@@ -8,7 +8,13 @@ from __future__ import absolute_import
 from . import logging as _logging
 _logging.setup()
 
+import hiero
 
-# Import remaining modules and instantiate ftrack plugin.
-from .plugin import Plugin as _Plugin
-plugin = _Plugin()
+
+if hiero.core.env.get('VersionMajor') <= 10:
+	# Import remaining modules and instantiate ftrack plugin.
+	from .plugin import Plugin as _Plugin
+	plugin = _Plugin()
+else:
+	import logging
+	logging.error('Not supported yet on nuke 11.')
