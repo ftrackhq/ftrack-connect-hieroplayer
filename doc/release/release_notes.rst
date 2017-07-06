@@ -9,6 +9,11 @@ Release notes
 
 .. release:: Upcoming
 
+    .. change:: fix
+        :tags: API
+
+        Nuke 11 not supported.
+
     .. change:: changed
         :tags: API
 
