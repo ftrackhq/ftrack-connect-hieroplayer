@@ -17,4 +17,4 @@ if hiero.core.env.get('VersionMajor') <= 10:
 	plugin = _Plugin()
 else:
 	import logging
-	logging.error('Not supported yet on nuke 11.')
+	logging.error('Hiero Player not supported yet on nuke 11.')
