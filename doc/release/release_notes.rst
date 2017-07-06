@@ -10,6 +10,11 @@ Release notes
 .. release:: 1.1.5
     :date: 2017-07-07
 
+    .. change:: fix
+        :tags: API
+
+        Nuke 11 not supported.
+
     .. change:: changed
         :tags: API
 
