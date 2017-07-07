@@ -7,7 +7,8 @@
 Release notes
 *************
 
-.. release:: Upcoming
+.. release:: 1.1.5
+    :date: 2017-07-07
 
     .. change:: changed
         :tags: API
