@@ -5,7 +5,17 @@ from __future__ import absolute_import
 
 import logging
 
-from QtExt import QtGui, QtCore, QtWebKit
+from QtExt import QtGui, QtCore, QtNetwork
+
+try:
+    from QtExt import QtWebKitWidgets as QtWebWidgets
+    HAS_WEBKIT=True
+except ImportError:
+    from QtExt import QtWebEngineWidgets as QtWebWidgets
+    HAS_WEBKIT=False
+    # Create some aliases for old QtWebKit classes.
+    QtWebWidgets.QWebPage = QtWebWidgets.QWebEnginePage
+    QtWebWidgets.QWebView = QtWebWidgets.QWebEngineView
 
 
 class WebView(QtGui.QWidget):
@@ -38,31 +48,17 @@ class WebView(QtGui.QWidget):
 
         self.plugin = plugin
 
-        self.webView = QtWebKit.QWebView()
+        self.webView = QtWebWidgets.QWebView()
         self.webView.urlChanged.connect(self.changedLocation)
 
         # Use plugin network access manager if available.
-        if self.plugin:
+        if self.plugin and HAS_WEBKIT:
             self.webView.page().setNetworkAccessManager(
                 self.plugin.networkAccessManager
             )
 
-        self.frame = self.webView.page().mainFrame()
-
-        # Enable developer tools for debugging loaded page.
-        self.webView.settings().setAttribute(
-            QtWebKit.QWebSettings.WebAttribute.DeveloperExtrasEnabled, True
-        )
-        self.inspector = QtWebKit.QWebInspector(self)
-        self.inspector.setPage(self.webView.page())
-        self.inspector.hide()
-
-        self.splitter = QtGui.QSplitter(self)
-        self.splitter.addWidget(self.webView)
-        self.splitter.addWidget(self.inspector)
-
         layout = QtGui.QVBoxLayout(self)
-        layout.addWidget(self.splitter)
+        layout.addWidget(self.webView)
 
         # Load the passed url.
         self.setUrl(url)
@@ -71,7 +67,11 @@ class WebView(QtGui.QWidget):
         '''Handle location changed event.'''
         # Inject the current plugin into the page so that it can be called
         # from JavaScript.
-        self.frame.addToJavaScriptWindowObject('hierosession', self.plugin)
+        if HAS_WEBKIT:
+            self.webView.page().mainFrame().addToJavaScriptWindowObject('hierosession', self.plugin)
+        else:
+            # TODO: port me...
+            pass
 
     def setUrl(self, url):
         '''Load *url*.'''
@@ -81,3 +81,9 @@ class WebView(QtGui.QWidget):
     def url(self):
         '''Return currently loaded *url*.'''
         return self.webView.url().toString()
+
+    def evaluateJavascript(self, javascript):
+        if HAS_WEBKIT:
+            self.webView.page().mainFrame().evaluateJavaScript(javascript)
+        else:
+            self.webView.page().evaluateJavaScript(javascript)

@@ -159,10 +159,10 @@ class Plugin(QObject):
         if not self._loaded:
             return
 
-        self.timelinePanel.frame.evaluateJavaScript(
+        self.timelinePanel.evaluateJavaScript(
             'FT.Mediator.breakItem("{0}")'.format(versionId)
         )
-        self.actionPanel.frame.evaluateJavaScript(
+        self.actionPanel.evaluateJavaScript(
             'FT.Mediator.breakItem("{0}")'.format(versionId)
         )
 
@@ -259,10 +259,10 @@ class Plugin(QObject):
         if not self._loaded:
             return
 
-        self.timelinePanel.frame.evaluateJavaScript(
+        self.timelinePanel.evaluateJavaScript(
             'FT.updateFtrack("{0}")'.format(eventData)
         )
-        self.actionPanel.frame.evaluateJavaScript(
+        self.actionPanel.evaluateJavaScript(
             'FT.updateFtrack("{0}")'.format(eventData)
         )
 
