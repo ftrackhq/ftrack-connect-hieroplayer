@@ -9,12 +9,5 @@ from . import logging as _logging
 _logging.setup()
 
 import hiero
-
-
-if hiero.core.env.get('VersionMajor') <= 10:
-	# Import remaining modules and instantiate ftrack plugin.
-	from .plugin import Plugin as _Plugin
-	plugin = _Plugin()
-else:
-	import logging
-	logging.error('Hiero Player not supported yet on nuke 11.')
+from .plugin import Plugin as _Plugin
+plugin = _Plugin()

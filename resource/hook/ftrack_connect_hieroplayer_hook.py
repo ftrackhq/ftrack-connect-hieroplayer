@@ -267,13 +267,19 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 launchArguments=['--player']
             ))
 
+        # Remove HieroPlayer 11 from the list of versions found.
+        filtered_applications = []
+        for app in applications:
+            if not app['version'].startswith('11.'):
+                filtered_applications.append(app)
+
         self.logger.debug(
             'Discovered applications:\n{0}'.format(
-                pprint.pformat(applications)
+                pprint.pformat(filtered_applications)
             )
         )
 
-        return applications
+        return filtered_applications
 
 
 def get_version_information(event):
