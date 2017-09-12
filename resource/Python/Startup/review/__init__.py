@@ -8,7 +8,6 @@ from __future__ import absolute_import
 from . import logging as _logging
 _logging.setup()
 
-
-# Import remaining modules and instantiate ftrack plugin.
+import hiero
 from .plugin import Plugin as _Plugin
 plugin = _Plugin()

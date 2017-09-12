@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 import logging
 
-from PySide import QtGui, QtCore, QtWebKit
+from QtExt import QtGui, QtCore, QtWebKit
 
 
 class WebView(QtGui.QWidget):
