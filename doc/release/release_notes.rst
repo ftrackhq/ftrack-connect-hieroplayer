@@ -7,13 +7,17 @@
 Release notes
 *************
 
-.. release:: 1.1.5
-    :date: 2017-07-07
+.. release:: 1.2.0
+    :date: 2017-09-12
 
     .. change:: fix
         :tags: API
 
         Nuke 11 not supported.
+   
+
+.. release:: 1.1.5
+    :date: 2017-07-07
 
     .. change:: changed
         :tags: API
