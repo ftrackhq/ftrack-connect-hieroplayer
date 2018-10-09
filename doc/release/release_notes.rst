@@ -7,6 +7,13 @@
 Release notes
 *************
 
+.. releaes:: Upcoming
+
+    .. change:: fix
+        :tags: Hook
+
+        Version check breaks using LooseVersion.
+
 .. release:: 1.2.0
     :date: 2017-09-12
 
@@ -14,7 +21,6 @@ Release notes
         :tags: API
 
         Nuke 11 not supported.
-   
 
 .. release:: 1.1.5
     :date: 2017-07-07
