@@ -270,7 +270,7 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
         # Remove HieroPlayer 11 from the list of versions found.
         filtered_applications = []
         for app in applications:
-            if not app['version'].version[0] >= 11:
+            if not app['version'].version[0] == 11:
                 filtered_applications.append(app)
 
         self.logger.debug(
