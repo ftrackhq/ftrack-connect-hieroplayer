@@ -3,23 +3,40 @@
 
 import os
 import re
-import glob
+import shutil
 
-from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
+from setuptools import setup, find_packages, Command
+from pip._internal import main as pip_main
 
+# Define paths
+
+PLUGIN_NAME = 'ftrack-connect-hieroplayer-{0}'
 
 ROOT_PATH = os.path.dirname(
     os.path.realpath(__file__)
 )
 
-SOURCE_PATH = os.path.join(
-    ROOT_PATH, 'source'
-)
+ROOT_PATH = os.path.dirname(os.path.realpath(__file__))
+
+RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
+
+SOURCE_PATH = os.path.join(ROOT_PATH, 'source')
 
 README_PATH = os.path.join(ROOT_PATH, 'README.rst')
 
-RESOURCE_PATH = os.path.join(ROOT_PATH, 'resource')
+BUILD_PATH = os.path.join(ROOT_PATH, 'build')
+
+STAGING_PATH = os.path.join(BUILD_PATH, PLUGIN_NAME)
+
+HIERO_WORKSPACES_PATH = os.path.join(RESOURCE_PATH, 'Workspaces')
+
+FTRACK_CONNECT_HIEROPLAYER_PLUGIN_PATH = os.path.join(
+    RESOURCE_PATH, 'Python'
+)
+
+
+HOOK_PATH = os.path.join(RESOURCE_PATH, 'hook')
 
 with open(os.path.join(
     SOURCE_PATH, 'ftrack_connect_hieroplayer', '_version.py')
@@ -29,43 +46,7 @@ with open(os.path.join(
     ).group(1)
 
 
-def get_files_from_folder(folder):
-    '''Get all files in a folder in resource folder.'''
-    plugin_directory = os.path.join(RESOURCE_PATH, folder)
-    plugin_data_files = []
-
-    for root, directories, files in os.walk(plugin_directory):
-        files_list = []
-        if files:
-            for filename in files:
-                files_list.append(
-                    os.path.join(root, filename)
-                )
-
-        if files_list:
-            destination_folder = root.replace(
-                RESOURCE_PATH, 'ftrack_connect_hieroplayer_source'
-            )
-            plugin_data_files.append(
-                (destination_folder, files_list)
-            )
-
-    return plugin_data_files
-
-data_files = []
-
-for child in os.listdir(
-    RESOURCE_PATH
-):
-    if os.path.isdir(os.path.join(RESOURCE_PATH, child)) and child != 'hook':
-        data_files += get_files_from_folder(child)
-
-data_files.append(
-    (
-        'ftrack_connect_hieroplayer_resource/hook',
-        glob.glob(os.path.join(RESOURCE_PATH, 'hook', '*.py'))
-    )
-)
+STAGING_PATH = STAGING_PATH.format(VERSION)
 
 
 # Custom commands.
@@ -82,6 +63,66 @@ class PyTest(TestCommand):
         import pytest
         errno = pytest.main(self.test_args)
         raise SystemExit(errno)
+
+
+class BuildPlugin(Command):
+    '''Build plugin.'''
+
+    description = 'Download dependencies and build plugin .'
+
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        '''Run the build step.'''
+        # Clean staging path
+        shutil.rmtree(STAGING_PATH, ignore_errors=True)
+
+        # Copy plugin files
+        shutil.copytree(
+            FTRACK_CONNECT_HIEROPLAYER_PLUGIN_PATH,
+            os.path.join(STAGING_PATH, 'resource', 'Python')
+        )
+
+        # Copy plugin files
+        shutil.copytree(
+            HIERO_WORKSPACES_PATH,
+            os.path.join(STAGING_PATH, 'resource', 'Workspaces')
+        )
+
+        # Copy hook files
+        shutil.copytree(
+            HOOK_PATH,
+            os.path.join(STAGING_PATH, 'hook')
+        )
+
+        # Install local dependencies
+        pip_main(
+            [
+                'install',
+                '.',
+                '--target',
+                os.path.join(STAGING_PATH, 'dependencies'),
+                '--process-dependency-links'
+            ]
+        )
+
+        # Generate plugin zip
+        shutil.make_archive(
+            os.path.join(
+                BUILD_PATH,
+                PLUGIN_NAME.format(VERSION)
+            ),
+            'zip',
+            STAGING_PATH
+        )
+
+
 
 # Configuration.
 setup(
@@ -108,7 +149,7 @@ setup(
         'pytest >= 2.3.5, < 3'
     ],
     cmdclass={
-        'test': PyTest
+        'test': PyTest,
+        'build_plugin': BuildPlugin
     },
-    data_files=data_files
 )

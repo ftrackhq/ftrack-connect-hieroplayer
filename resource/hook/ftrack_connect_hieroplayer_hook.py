@@ -11,88 +11,135 @@ import re
 
 import ftrack
 import ftrack_connect.application
-import ftrack_connect_hieroplayer
 
 
 ACTION_IDENTIFIER = 'ftrack-connect-launch-hieroplayer_with_review'
 
-FTRACK_CONNECT_HIEROPLAYER_PATH = os.environ.get(
-    'FTRACK_CONNECT_HIEROPLAYER_PATH',
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__), '..', 'hieroplayer'
-        )
-    )
+
+cwd = os.path.dirname(__file__)
+sources = os.path.abspath(os.path.join(cwd, '..', 'dependencies'))
+ftrack_connect_hiero_player_resource_path = os.path.abspath(os.path.join(
+    cwd, '..',  'resource')
 )
+sys.path.append(sources)
+
+import ftrack_connect_hieroplayer
 
 
-class DiscoverApplicationsHook(object):
-    '''Default action.discover hook.'''
 
-    identifier = ACTION_IDENTIFIER
+class LaunchApplicationAction(object):
+    '''Discover and launch maya.'''
 
-    def __init__(self, applicationStore):
-        '''Instantiate hook with *applicationStore*.
+    identifier = 'ftrack-connect-launch-hieroplayer_with_review'
+
+    def __init__(self, application_store, launcher):
+        '''Initialise action with *applicationStore* and *launcher*.
 
         *applicationStore* should be an instance of
-        :class:`ftrack_connect.application.ApplicationStore`
+        :class:`ftrack_connect.application.ApplicationStore`.
+
+        *launcher* should be an instance of
+        :class:`ftrack_connect.application.ApplicationLauncher`.
 
         '''
-        super(DiscoverApplicationsHook, self).__init__()
+        super(LaunchApplicationAction, self).__init__()
+
         self.logger = logging.getLogger(
             __name__ + '.' + self.__class__.__name__
         )
-        self.applicationStore = applicationStore
 
-    def __call__(self, event):
-        '''Handle *event*.'''
+        self.application_store = application_store
+        self.launcher = launcher
+
+    def is_valid_selection(self, selection):
+        '''Return true if the selection is valid.'''
+        # if (
+        #     len(selection) != 1 or
+        #     selection[0]['entityType'] != 'task'
+        # ):
+        #     return False
+        #
+        # entity = selection[0]
+        # task = ftrack.Task(entity['entityId'])
+        #
+        # if task.getObjectType() != 'Task':
+        #     return False
+
+        return True
+
+    def register(self):
+        '''Register discover actions on logged in user.'''
+        ftrack.EVENT_HUB.subscribe(
+            'topic=ftrack.action.discover and source.user.username={0}'.format(
+                getpass.getuser()
+            ),
+            self.discover
+        )
+
+        ftrack.EVENT_HUB.subscribe(
+            'topic=ftrack.action.launch and source.user.username={0} '
+            'and data.actionIdentifier={1}'.format(
+                getpass.getuser(), self.identifier
+            ),
+            self.launch
+        )
+
+        ftrack.EVENT_HUB.subscribe(
+            'topic=ftrack.connect.plugin.debug-information',
+            self.get_version_information
+        )
+
+    def discover(self, event):
+        '''Return discovered applications.'''
+
+        if not self.is_valid_selection(
+            event['data'].get('selection', [])
+        ):
+            return
 
         items = []
-        applications = self.applicationStore.applications
+        applications = self.application_store.applications
         applications = sorted(
             applications, key=lambda application: application['label']
         )
 
         for application in applications:
-            applicationIdentifier = application['identifier']
+            application_identifier = application['identifier']
             label = application['label']
             items.append({
                 'actionIdentifier': self.identifier,
                 'label': label,
-                'variant': application.get('variant', None),
-                'description': application.get('description', None),
                 'icon': application.get('icon', 'default'),
-                'applicationIdentifier': applicationIdentifier
+                'variant': application.get('variant', None),
+                'applicationIdentifier': application_identifier
             })
 
         return {
             'items': items
         }
 
-
-class LaunchApplicationHook(object):
-
-    def __init__(self, launcher):
-        '''Initialise hook with *launcher*.
-
-        *launcher* should be an instance of
-        :class:`ftrack_connect.application.ApplicationLauncher`.
-
-        '''
-        super(LaunchApplicationHook, self).__init__()
-        self.logger = logging.getLogger(
-            'ftrack.hook.' + self.__class__.__name__
-        )
-        self.launcher = launcher
-
-    def __call__(self, event):
+    def launch(self, event):
         '''Handle *event*.
 
         event['data'] should contain:
 
             *applicationIdentifier* to identify which application to start.
-            *selection* to load in review timeline.
+
         '''
+        # Prevent further processing by other listeners.
+        event.stop()
+
+        if not self.is_valid_selection(
+            event['data'].get('selection', [])
+        ):
+            return
+
+        context = event['data'].copy()
+        context['source'] = event['source']
+
+        context = event['data'].copy()
+        context['source'] = event['source']
+
         # Prevent further processing by other listeners.
         # TODO: Only do this when actually have managed to launch a relevant
         # application.
@@ -143,6 +190,13 @@ class LaunchApplicationHook(object):
 
         return selection
 
+    def get_version_information(self, event):
+        '''Return version information.'''
+        return dict(
+            name='ftrack connect maya',
+            version=ftrack_connect_hieroplayer.__version__
+        )
+
 
 class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
     '''Launch HieroPlayer.'''
@@ -155,8 +209,18 @@ class ApplicationLauncher(ftrack_connect.application.ApplicationLauncher):
             application, context
         )
 
-        environment['HIERO_PLUGIN_PATH'] = os.path.join(
-            FTRACK_CONNECT_HIEROPLAYER_PATH
+        environment = ftrack_connect.application.appendPath(
+            os.environ.get(
+                'FTRACK_CONNECT_HIEROPLAYER_PATH',
+                ftrack_connect_hiero_player_resource_path
+            ),
+            'HIERO_PLUGIN_PATH',
+            environment
+        )
+        environment = ftrack_connect.application.appendPath(
+            sources,
+            'PYTHONPATH',
+            environment
         )
 
         return environment
@@ -267,29 +331,20 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
                 launchArguments=['--player']
             ))
 
-        # Remove HieroPlayer 11 from the list of versions found.
-        filtered_applications = []
-        for app in applications:
-            if not app['version'].version[0] == 11:
-                filtered_applications.append(app)
+        # # Remove HieroPlayer 11 from the list of versions found.
+        # filtered_applications = []
+        # for app in applications:
+        #     if not app['version'].version[0] == 11:
+        #         filtered_applications.append(app)
 
         self.logger.debug(
             'Discovered applications:\n{0}'.format(
-                pprint.pformat(filtered_applications)
+                pprint.pformat(applications)
             )
         )
+        print 'APPLICATIONS:', applications
 
-        return filtered_applications
-
-
-def get_version_information(event):
-    '''Return version information.'''
-    return [
-        dict(
-            name='ftrack connect hieroplayer',
-            version=ftrack_connect_hieroplayer.__version__
-        )
-    ]
+        return applications
 
 
 def register(registry, **kw):
@@ -309,26 +364,12 @@ def register(registry, **kw):
         )
         return
 
-    applicationStore = ApplicationStore()
+    # Create store containing applications.
+    application_store = ApplicationStore()
 
-    ftrack.EVENT_HUB.subscribe(
-        'topic=ftrack.action.discover and source.user.username={0}'.format(
-            getpass.getuser()
-        ),
-        DiscoverApplicationsHook(applicationStore)
-    )
+    # Create a launcher with the store containing applications.
+    launcher = ApplicationLauncher(application_store)
 
-    ftrack.EVENT_HUB.subscribe(
-        'topic=ftrack.action.launch and source.user.username={0} '
-        'and data.actionIdentifier={1}'.format(
-            getpass.getuser(), ACTION_IDENTIFIER
-        ),
-        LaunchApplicationHook(
-            ApplicationLauncher(applicationStore)
-        )
-    )
-
-    ftrack.EVENT_HUB.subscribe(
-        'topic=ftrack.connect.plugin.debug-information',
-        get_version_information
-    )
+    # Create action and register to respond to discover and launch actions.
+    action = LaunchApplicationAction(application_store, launcher)
+    action.register()
