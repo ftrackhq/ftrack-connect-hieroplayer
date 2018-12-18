@@ -334,7 +334,7 @@ class ApplicationStore(ftrack_connect.application.ApplicationStore):
         # Remove HieroPlayer 11 from the list of versions found.
         filtered_applications = []
         for app in applications:
-            major, minor, v, patch = app['version'].version
+            major = app['version'].version[0]
             if major >= 11:
                 # We do not support yet version over 11.2vX
                 self.logger.warning(
