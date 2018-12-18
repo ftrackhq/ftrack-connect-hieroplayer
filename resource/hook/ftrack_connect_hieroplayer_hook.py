@@ -193,7 +193,7 @@ class LaunchApplicationAction(object):
     def get_version_information(self, event):
         '''Return version information.'''
         return dict(
-            name='ftrack connect maya',
+            name='ftrack connect hieroplayer',
             version=ftrack_connect_hieroplayer.__version__
         )
 
