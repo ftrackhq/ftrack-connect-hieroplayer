@@ -53,18 +53,6 @@ class LaunchApplicationAction(object):
 
     def is_valid_selection(self, selection):
         '''Return true if the selection is valid.'''
-        # if (
-        #     len(selection) != 1 or
-        #     selection[0]['entityType'] != 'task'
-        # ):
-        #     return False
-        #
-        # entity = selection[0]
-        # task = ftrack.Task(entity['entityId'])
-        #
-        # if task.getObjectType() != 'Task':
-        #     return False
-
         return True
 
     def register(self):
