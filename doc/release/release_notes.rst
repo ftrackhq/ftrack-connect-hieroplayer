@@ -7,6 +7,13 @@
 Release notes
 *************
 
+.. release:: Upcoming
+
+    ..change:: changed
+        :tags: Setup
+
+        Pip compatibility for version 19.3.0 or higher
+
 .. release:: 1.3.0
     :date: 2018-12-20
 
