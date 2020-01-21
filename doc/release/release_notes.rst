@@ -7,7 +7,8 @@
 Release notes
 *************
 
-.. release:: Upcoming
+.. release:: 1.3.1
+    :date: 2020-01-21
 
     ..change:: changed
         :tags: Setup
