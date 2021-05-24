@@ -21,6 +21,33 @@ from .web_view import WebView as _WebView
 class Plugin(QObject):
     '''ftrack connect HIEROPLAYER plugin.'''
 
+    @property
+    def session(self)
+        return self._session
+
+    def _translateEntityType(self, entityType):
+        '''Return translated entity type tht can be used with API.'''
+        # Get entity tpe and make sure it is lower cased. Most places except
+        # the component tab in the Sidebar will use lower case notation.
+        entity_type = entityType.replace('_', '').lower()
+
+        for schema in self.session.schemas:
+            alias_for = schema.get('alias_for')
+
+            if (
+                alias_for and isinstance(alias_for, str) and
+                alias_for.lower() == entity_type
+            ):
+                return schema['id']
+
+        for schema in self.session.schemas:
+            if schema['id'].lower() == entity_type:
+                    return schema['id']
+
+        raise ValueError(
+            'Unable to translate entity type: {0}.'.format(entity_type)
+        )
+
     def __init__(self):
         '''Initialise plugin.'''
         super(Plugin, self).__init__()
@@ -43,8 +70,8 @@ class Plugin(QObject):
         serverUrl = os.environ.get('FTRACK_SERVER', None)
         appServerUrl = appSettings.value('FTRACK_SERVER', defaultValue=None)
 
-        self.entityId = None
         self.entityType = None
+        self.entityId = None
 
         # Check for environment variable specifying additional information to
         # use when loading.
@@ -68,13 +95,16 @@ class Plugin(QObject):
                     try:
                         entity = selection[0]
                         self.entityId = entity.get('entityId')
-                        self.entityType = entity.get('entityType')
+                        entityType = entity.get('entityType')
 
                     except (IndexError, AttributeError, KeyError):
                         self.logger.exception(
                             'Failed to extract selection information from: {0}'
                             .format(selection)
                         )
+
+
+                self.entityType = self._translateEntityType(entityType)
         else:
             self.logger.debug(
                 'No event data retrieved. {0} not set.'
@@ -88,7 +118,7 @@ class Plugin(QObject):
             self.serverUrl = serverUrl or appServerUrl
             url = self.getViewUrl('review_navigation')
 
-        if not self.api:
+        if not self.session:
             url = self.getViewUrl('api_error')
 
         # Create cookie jar to store authentication credentials in for session.
@@ -105,27 +135,6 @@ class Plugin(QObject):
 
         hiero.ui.setWorkspace('ftrack')
 
-    @property
-    def api(self):
-        try:
-            import ftrack
-        except ImportError:
-            raise Exception(
-                'ftrack legacy api not found in PYTHONPATH.'
-            )
-
-        try:
-            ftrack.setup()
-        except Exception as error:
-            self.logger.debug(error)
-            # Initialize ftrack legacy api to register locations,
-            # ignore hub Exceptions.
-            pass
-
-        self._api = ftrack
-        self.logger.debug('Ftrack legacy python API successfully loaded.')
-        return self._api
-
     def getViewUrl(self, name):
         '''Return url for view file with *name*.'''
         url = os.path.join(
@@ -136,17 +145,20 @@ class Plugin(QObject):
         if not os.path.exists(url):
             # Assume a url served by ftrack server.
             configuration = base64.b64encode(
-                json.dumps({
-                    'attachments': False,
-                    'versionsTab': True,
-                    'notesTab': True,
-                    'undockable': False
-                })
-            )
+                json.dumps(
+                    {
+                        'attachments': False,
+                        'versionsTab': True,
+                        'notesTab': True,
+                        'undockable': False
+                    }
+                ).encode("utf-8")
+            ).decode('ascii'),
 
-            url = self.api.getWebWidgetUrl(
-                name, 'tf', entityId=self.entityId, entityType=self.entityType
-            )
+
+            new_entity = session.get(=self.entityType, self.entityId)
+
+            url = self.session.get_widget_url(name, entity=new_entity)
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
                 baseUrl=url, configuration=configuration
@@ -171,8 +183,8 @@ class Plugin(QObject):
         path = self._componentPathCache.get(componentId, None)
 
         if path is None:
-            ftrack_component = self._session.get('Component', componentId)
-            location = self._session.pick_location(component=ftrack_component)
+            ftrack_component = self.session.get('Component', componentId)
+            location = self.session.pick_location(component=ftrack_component)
 
             if not location:
                 raise IOError(
