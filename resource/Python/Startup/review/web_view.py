@@ -5,10 +5,10 @@ from __future__ import absolute_import
 
 import logging
 
-from QtExt import QtGui, QtCore, QtWebKit
+from Qt import QtGui, QtWidgets, QtCore, QtWebKit
 
 
-class WebView(QtGui.QWidget):
+class WebView(QtWidgets.QWidget):
     '''Display a web view.'''
 
     def __init__(self, name, url=None, plugin=None, parent=None):

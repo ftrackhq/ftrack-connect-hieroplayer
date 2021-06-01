@@ -9,8 +9,8 @@ import base64
 import logging
 import uuid
 
-from QtExt.QtNetwork import *
-from QtExt.QtCore import QObject, Slot
+from Qt.QtNetwork import *
+from Qt.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
 
@@ -22,7 +22,7 @@ class Plugin(QObject):
     '''ftrack connect HIEROPLAYER plugin.'''
 
     @property
-    def session(self)
+    def session(self):
         return self._session
 
     def _translateEntityType(self, entityType):
