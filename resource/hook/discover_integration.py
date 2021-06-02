@@ -7,10 +7,7 @@ import os
 
 import ftrack_api
 
-
-
-
-def on_discover_rv_integration(session, event):
+def on_discover_hieroplayer_integration(session, event):
     cwd = os.path.dirname(__file__)
     sources = os.path.abspath(os.path.join(cwd, '..', 'dependencies'))
     sys.path.append(sources)
@@ -19,7 +16,7 @@ def on_discover_rv_integration(session, event):
         cwd, '..',  'resource')
     )
 
-    from ftrack_connect_hieroplayer import __version__ as integration_version
+    # from ftrack_connect_hieroplayer import __version__ as integration_version
 
     hieroplayer_path = os.environ.get(
         'FTRACK_CONNECT_HIEROPLAYER_PATH',
@@ -29,7 +26,7 @@ def on_discover_rv_integration(session, event):
     data = {
         'integration': {
             'name': 'ftrack-connect-hieroplayer',
-            'version': integration_version,
+            'version': '1.4.0',
             'env': {
                 'HIERO_PLUGIN_PATH.append': hieroplayer_path,
                 'PYTHONPATH.prepend': sources,
@@ -45,7 +42,7 @@ def register(session):
         return
 
     handle_event = functools.partial(
-        on_discover_rv_integration,
+        on_discover_hieroplayer_integration,
         session
     )
     session.event_hub.subscribe(
