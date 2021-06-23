@@ -146,6 +146,7 @@ setup(
         'sphinx_rtd_theme >= 0.1.6, < 2'
     ],
     install_requires=[
+        'qt.py',
         'ftrack-python-api >=2, <3',
     ],
     tests_require=[
@@ -155,4 +156,5 @@ setup(
         'test': PyTest,
         'build_plugin': BuildPlugin
     },
+    python_requires=">=3, <4.0"
 )
