@@ -46,6 +46,7 @@ def on_launch_hieroplayer_integration(session, event):
     hieroplayer_base_data['integration']['env'] = {
         'HIERO_PLUGIN_PATH.append': hieroplayer_path,
         'PYTHONPATH.prepend': sources,
+        'QTWEBENGINE_REMOTE_DEBUGGING.set': '9999'
     }
 
     return hieroplayer_base_data
