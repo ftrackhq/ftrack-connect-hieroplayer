@@ -42,25 +42,10 @@ class WebView(QtWidgets.QWidget):
         self.webView = QtWebEngineWidgets.QWebEngineView()
         self.webView.urlChanged.connect(self.changedLocation)
 
-        # # Use plugin network access manager if available.
-        # if self.plugin:
-        #     self.webView.setNetworkAccessManager(
-        #         self.plugin.networkAccessManager
-        #     )
-
         self.page = self.webView.page()
-
-        # Enable developer tools for debugging loaded page.
-        # self.webView.settings().setAttribute(
-        #     QtWebEngineWidgets.QWebSettings.WebAttribute.DeveloperExtrasEnabled, True
-        # )
-        # self.inspector = QtWebEngineWidgets.QWebInspector(self)
-        # self.inspector.setPage(self.webView.page())
-        # self.inspector.hide()
 
         self.splitter = QtWidgets.QSplitter(self)
         self.splitter.addWidget(self.webView)
-        # self.splitter.addWidget(self.inspector)
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.splitter)

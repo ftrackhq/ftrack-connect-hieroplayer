@@ -103,8 +103,7 @@ class Plugin(QObject):
                             'Failed to extract selection information from: {0}'
                             .format(selection)
                         )
-
-                self.entityType = self._translateEntityType(oldEntityType)
+                    self.entityType = self._translateEntityType(oldEntityType)
         else:
             self.logger.debug(
                 'No event data retrieved. {0} not set.'
@@ -153,15 +152,20 @@ class Plugin(QObject):
                         'undockable': False
                     }
                 ).encode("utf-8")
-            ).decode('ascii'),
+            ).decode('ascii')
 
-            new_entity = self.session.get(self.entityType, self.entityId)
+            try:
+                new_entity = self.session.get(self.entityType, self.entityId)
+            except Exception as error:
+                self.logger.debug(str(error))
+                new_entity = None
 
             url = self.session.get_widget_url(name, entity=new_entity)
 
             url = '{baseUrl}&widgetCfg={configuration}'.format(
                 baseUrl=url, configuration=configuration
             )
+
 
         return url
 
