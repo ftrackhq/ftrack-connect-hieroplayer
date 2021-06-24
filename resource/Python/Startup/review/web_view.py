@@ -1,11 +1,13 @@
 # :coding: utf-8
 # :copyright: Copyright (c) 2014 ftrack
+# https://doc.qt.io/qt-5/qtwebenginewidgets-qtwebkitportingguide.html
 
 from __future__ import absolute_import
 
 import logging
 
-from Qt import QtGui, QtWidgets, QtCore, QtWebKit
+# qt.py seems to be having issue importing QtWebEngineWidgets
+from PySide2 import QtGui, QtWidgets, QtCore, QtWebEngineWidgets, QtWebChannel
 
 
 class WebView(QtWidgets.QWidget):
@@ -35,33 +37,32 @@ class WebView(QtWidgets.QWidget):
 
         self.setObjectName(name.lower().replace(' ', '.'))
         self.setWindowTitle(name)
-
         self.plugin = plugin
 
-        self.webView = QtWebKit.QWebView()
+        self.webView = QtWebEngineWidgets.QWebEngineView()
         self.webView.urlChanged.connect(self.changedLocation)
 
-        # Use plugin network access manager if available.
-        if self.plugin:
-            self.webView.page().setNetworkAccessManager(
-                self.plugin.networkAccessManager
-            )
+        # # Use plugin network access manager if available.
+        # if self.plugin:
+        #     self.webView.setNetworkAccessManager(
+        #         self.plugin.networkAccessManager
+        #     )
 
-        self.frame = self.webView.page().mainFrame()
+        self.page = self.webView.page()
 
         # Enable developer tools for debugging loaded page.
-        self.webView.settings().setAttribute(
-            QtWebKit.QWebSettings.WebAttribute.DeveloperExtrasEnabled, True
-        )
-        self.inspector = QtWebKit.QWebInspector(self)
-        self.inspector.setPage(self.webView.page())
-        self.inspector.hide()
+        # self.webView.settings().setAttribute(
+        #     QtWebEngineWidgets.QWebSettings.WebAttribute.DeveloperExtrasEnabled, True
+        # )
+        # self.inspector = QtWebEngineWidgets.QWebInspector(self)
+        # self.inspector.setPage(self.webView.page())
+        # self.inspector.hide()
 
-        self.splitter = QtGui.QSplitter(self)
+        self.splitter = QtWidgets.QSplitter(self)
         self.splitter.addWidget(self.webView)
-        self.splitter.addWidget(self.inspector)
+        # self.splitter.addWidget(self.inspector)
 
-        layout = QtGui.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.splitter)
 
         # Load the passed url.
@@ -71,7 +72,9 @@ class WebView(QtWidgets.QWidget):
         '''Handle location changed event.'''
         # Inject the current plugin into the page so that it can be called
         # from JavaScript.
-        self.frame.addToJavaScriptWindowObject('hierosession', self.plugin)
+        channel = QtWebChannel.QWebChannel(self)
+        self.page.setWebChannel(channel)
+        channel.registerObject('hierosession', self.plugin)
 
     def setUrl(self, url):
         '''Load *url*.'''

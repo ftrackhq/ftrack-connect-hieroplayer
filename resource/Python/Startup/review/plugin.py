@@ -73,6 +73,7 @@ class Plugin(QObject):
         self.entityType = None
         self.entityId = None
 
+        oldEntityType = None
         # Check for environment variable specifying additional information to
         # use when loading.
         eventEnvironmentVariable = 'FTRACK_CONNECT_EVENT'
@@ -95,7 +96,7 @@ class Plugin(QObject):
                     try:
                         entity = selection[0]
                         self.entityId = entity.get('entityId')
-                        entityType = entity.get('entityType')
+                        oldEntityType = entity.get('entityType')
 
                     except (IndexError, AttributeError, KeyError):
                         self.logger.exception(
@@ -103,8 +104,7 @@ class Plugin(QObject):
                             .format(selection)
                         )
 
-
-                self.entityType = self._translateEntityType(entityType)
+                self.entityType = self._translateEntityType(oldEntityType)
         else:
             self.logger.debug(
                 'No event data retrieved. {0} not set.'
