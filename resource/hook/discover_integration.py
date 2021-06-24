@@ -7,14 +7,15 @@ import os
 import logging
 
 NAME = 'ftrack-connect-hieroplayer'
-import ftrack_api
 
-logger = logging.getLogger('{}.hook'.format(NAME.replace('-','_')))
+logger = logging.getLogger()
 
 
 cwd = os.path.dirname(__file__)
 sources = os.path.abspath(os.path.join(cwd, '..', 'dependencies'))
 sys.path.append(sources)
+
+import ftrack_api
 
 
 def on_discover_hieroplayer_integration(session, event):
@@ -61,10 +62,9 @@ def register(session):
     )
     session.event_hub.subscribe(
         'topic=ftrack.connect.application.discover'
-        ' and data.application.identifier=nuke*'
-        ' and data.application.version >= 13.0',
-        handle_discover_event,
-        priority=20
+        ' and data.application.identifier=hieroplayer_*'
+        ' and data.application.version >= 13',
+        handle_discover_event
     )
 
     handle_launch_event = functools.partial(
@@ -74,10 +74,9 @@ def register(session):
 
     session.event_hub.subscribe(
         'topic=ftrack.connect.application.launch'
-        ' and data.application.identifier=nuke*'
-        ' and data.application.version >= 13.0',
-        handle_launch_event,
-        priority=20
+        ' and data.application.identifier=hieroplayer_*'
+        ' and data.application.version >= 13',
+        handle_launch_event
     )
 
 

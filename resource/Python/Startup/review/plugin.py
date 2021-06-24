@@ -9,7 +9,7 @@ import base64
 import logging
 import uuid
 
-from Qt.QtNetwork import *
+from Qt.QtNetwork import QNetworkCookieJar, QNetworkAccessManager
 from Qt.QtCore import QObject, Slot
 import hiero.ui
 import hiero.core
@@ -155,8 +155,7 @@ class Plugin(QObject):
                 ).encode("utf-8")
             ).decode('ascii'),
 
-
-            new_entity = session.get(=self.entityType, self.entityId)
+            new_entity = self.session.get(self.entityType, self.entityId)
 
             url = self.session.get_widget_url(name, entity=new_entity)
 
