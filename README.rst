@@ -33,7 +33,7 @@ Dependencies
 Documentation
 *************
 
-Full documentation can be found at http://ftrack-connect-hieroplayer.rtd.ftrack.com/en/latest/
+Full documentation can be found at https://ftrack-connect-hieroplayer.readthedocs.io/en/latest/
 
 *********************
 Copyright and license
